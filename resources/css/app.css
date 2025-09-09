@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Password toggle button styling */
+.password-toggle-btn {
+    @apply absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition-colors duration-200;
+}
+
+.password-toggle-btn:hover {
+    @apply text-indigo-600;
+}
+
+.password-toggle-btn svg {
+    @apply w-5 h-5 transition-all duration-200;
+}
+
+/* Input dengan icon styling */
+.input-with-icon {
+    @apply pr-12;
+}
+
+/* Smooth transition untuk icon */
+.icon-transition {
+    @apply transition-opacity duration-200;
+}

@@ -1,0 +1,2480 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "API Dokumentasi BKPSDM Katingan",
+        "description": "Ini adalah dokumentasi API yang digunakan untuk website BKPSDM Katingan.",
+        "contact": {
+            "name": "Developer",
+            "email": "deprowinoto3690@gmail.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Local Development Server"
+        }
+    ],
+    "paths": {
+        "/api/agendas": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Menampilkan daftar semua agenda kegiatan",
+                "operationId": "getAgendaList",
+                "parameters": [
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan judul atau deskripsi",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "description": "Filter berdasarkan bulan (1-12)",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 12,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "description": "Filter berdasarkan tahun",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Jumlah data per halaman (default: 10)",
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Agenda"
+                                            }
+                                        },
+                                        "first_page_url": {
+                                            "type": "string",
+                                            "example": "http://127.0.0.1:8000/api/agendas?page=1"
+                                        },
+                                        "from": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "last_page": {
+                                            "type": "integer",
+                                            "example": 5
+                                        },
+                                        "last_page_url": {
+                                            "type": "string",
+                                            "example": "http://127.0.0.1:8000/api/agendas?page=5"
+                                        },
+                                        "next_page_url": {
+                                            "type": "string",
+                                            "example": "http://127.0.0.1:8000/api/agendas?page=2",
+                                            "nullable": true
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "example": "http://127.0.0.1:8000/api/agendas"
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "prev_page_url": {
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "to": {
+                                            "type": "integer",
+                                            "example": 10
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 45
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Membuat agenda baru (memerlukan token)",
+                "operationId": "storeAgenda",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "description": "Judul agenda kegiatan",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Rapat Koordinasi Bulanan"
+                                    },
+                                    "description": {
+                                        "description": "Deskripsi detail kegiatan agenda (minimal 10 karakter)",
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "example": "Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan."
+                                    },
+                                    "file": {
+                                        "description": "File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Agenda berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Agenda"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/agendas/{slug}": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Menampilkan detail satu agenda",
+                "operationId": "getAgendaBySlug",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "contoh-agenda"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Agenda"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Memperbarui agenda yang ada (memerlukan token)",
+                "operationId": "updateAgenda",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "contoh-agenda"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "description": "Judul agenda kegiatan (opsional untuk update)",
+                                        "type": "string",
+                                        "maxLength": 255,
+                                        "example": "Rapat Koordinasi Bulanan API Updated"
+                                    },
+                                    "description": {
+                                        "description": "Deskripsi detail kegiatan agenda (opsional untuk update, minimal 10 karakter jika diisi)",
+                                        "type": "string",
+                                        "minLength": 10,
+                                        "example": "Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan. Updated via API"
+                                    },
+                                    "file": {
+                                        "description": "File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB.",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Agenda berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Agenda"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Menghapus agenda (memerlukan token)",
+                "operationId": "deleteAgenda",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "contoh-agenda"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Agenda berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/agendas/{slug}/download": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Mengunduh file agenda",
+                "operationId": "downloadAgendaFile",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "contoh-agenda"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File berhasil diunduh",
+                        "content": {
+                            "application/octet-stream": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Data atau file tidak ditemukan"
+                    }
+                }
+            }
+        },
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Login pengguna untuk mendapatkan API token",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "superadmin@example.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "1|aBcDeFgHiJkLmNoPqRsTuVwXyZ"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                }
+            }
+        },
+        "/api/logout": {
+            "post": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Logout pengguna dan menghapus token",
+                "operationId": "authLogout",
+                "responses": {
+                    "200": {
+                        "description": "Logout berhasil"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/user": {
+            "get": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Mendapatkan data pengguna yang sedang login",
+                "operationId": "authGetUser",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "get": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Mendapatkan data profil pengguna yang sedang login",
+                "operationId": "getProfile",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Memperbarui nama dan email pengguna",
+                "operationId": "updateProfile",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Nama Baru Pengguna"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "emailbaru@example.com"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/password": {
+            "put": {
+                "tags": [
+                    "Autentikasi"
+                ],
+                "summary": "Memperbarui password pengguna",
+                "operationId": "updatePassword",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "current_password",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "current_password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password berhasil diperbarui"
+                    },
+                    "422": {
+                        "description": "Validation Error / Password lama salah"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/beritas": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Menampilkan daftar berita yang sudah dipublikasi",
+                "operationId": "getBeritaList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Berita"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Membuat berita baru (memerlukan token)",
+                "operationId": "storeBerita",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "content"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "thumbnail": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Berita berhasil dibuat",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Berita"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/beritas/{id}": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Menampilkan detail satu berita",
+                "operationId": "getBeritaById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Berita"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Memperbarui berita yang ada (memerlukan token)",
+                "operationId": "updateBerita",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "content",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "content": {
+                                        "type": "string"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "published"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Berita berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Berita"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Menghapus berita (memerlukan token)",
+                "operationId": "deleteBerita",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Berita berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/galeris": {
+            "get": {
+                "tags": [
+                    "Galeri"
+                ],
+                "summary": "Menampilkan daftar semua gambar di galeri",
+                "operationId": "getGaleriList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Galeri"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Galeri"
+                ],
+                "summary": "Menambah gambar baru ke galeri (memerlukan token)",
+                "operationId": "storeGaleri",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "image"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Gambar berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Galeri"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/galeris/{id}": {
+            "get": {
+                "tags": [
+                    "Galeri"
+                ],
+                "summary": "Menampilkan detail satu gambar galeri",
+                "operationId": "getGaleriById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Galeri"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Galeri"
+                ],
+                "summary": "Menghapus gambar dari galeri (memerlukan token)",
+                "operationId": "deleteGaleri",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Gambar berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/heroes": {
+            "get": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Menampilkan daftar semua slide hero/banner",
+                "operationId": "getHeroList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Hero"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Menambah slide hero/banner baru (memerlukan token)",
+                "operationId": "storeHero",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "background_image",
+                                    "order"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Selamat Datang di BKPSDM Katingan"
+                                    },
+                                    "subtitle": {
+                                        "type": "string",
+                                        "example": "Melayani dengan Sepenuh Hati"
+                                    },
+                                    "background_image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "button_text": {
+                                        "type": "string",
+                                        "example": "Selengkapnya"
+                                    },
+                                    "button_link": {
+                                        "type": "string",
+                                        "format": "url",
+                                        "example": "https://example.com"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Slide hero berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hero"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/heroes/{id}": {
+            "get": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Menampilkan detail satu slide hero/banner",
+                "operationId": "getHeroById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hero"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Memperbarui slide hero/banner (memerlukan token)",
+                "operationId": "updateHero",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "order"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "subtitle": {
+                                        "type": "string"
+                                    },
+                                    "button_text": {
+                                        "type": "string"
+                                    },
+                                    "button_link": {
+                                        "type": "string",
+                                        "format": "url"
+                                    },
+                                    "order": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Slide hero berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hero"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Menghapus slide hero/banner (memerlukan token)",
+                "operationId": "deleteHero",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Slide hero berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/heroes/{id}/image": {
+            "post": {
+                "tags": [
+                    "Hero"
+                ],
+                "summary": "Update background image slide hero (memerlukan token)",
+                "operationId": "updateHeroImage",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "background_image"
+                                ],
+                                "properties": {
+                                    "background_image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Background image berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Hero"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/kontaks": {
+            "get": {
+                "tags": [
+                    "Kontak"
+                ],
+                "summary": "Menampilkan daftar semua pesan kontak (memerlukan token)",
+                "operationId": "getKontakList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/KontakMessage"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Kontak"
+                ],
+                "summary": "Mengirim pesan kontak baru",
+                "operationId": "storeKontak",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "subject",
+                                    "message"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "john@example.com"
+                                    },
+                                    "subject": {
+                                        "type": "string",
+                                        "example": "Subjek Pesan"
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Ini adalah pesan kontak dari pengguna"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pesan berhasil dikirim",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/KontakMessage"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                }
+            }
+        },
+        "/api/kontaks/{id}": {
+            "get": {
+                "tags": [
+                    "Kontak"
+                ],
+                "summary": "Menampilkan detail satu pesan kontak (memerlukan token)",
+                "operationId": "getKontakById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/KontakMessage"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Kontak"
+                ],
+                "summary": "Menghapus pesan kontak (memerlukan token)",
+                "operationId": "deleteKontak",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Pesan berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pejabats": {
+            "get": {
+                "tags": [
+                    "Pejabat"
+                ],
+                "summary": "Menampilkan daftar semua pejabat/struktur organisasi",
+                "operationId": "getPejabatList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Pejabat"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Pejabat"
+                ],
+                "summary": "Menambah pejabat baru (memerlukan token)",
+                "operationId": "storePejabat",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "jabatan",
+                                    "order"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "jabatan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Kepala Badan",
+                                            "Sekretaris",
+                                            "Kepala Bidang A",
+                                            "Kepala Bidang B",
+                                            "Staf Ahli"
+                                        ],
+                                        "example": "Sekretaris"
+                                    },
+                                    "nip": {
+                                        "type": "string",
+                                        "example": "198512345678901234"
+                                    },
+                                    "photo": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Pejabat berhasil ditambahkan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pejabat"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/pejabats/{id}": {
+            "get": {
+                "tags": [
+                    "Pejabat"
+                ],
+                "summary": "Menampilkan detail satu pejabat",
+                "operationId": "getPejabatById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pejabat"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Pejabat"
+                ],
+                "summary": "Memperbarui data pejabat (memerlukan token)",
+                "operationId": "updatePejabat",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "jabatan",
+                                    "order"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "John Doe"
+                                    },
+                                    "jabatan": {
+                                        "type": "string",
+                                        "enum": [
+                                            "Kepala Badan",
+                                            "Sekretaris",
+                                            "Kepala Bidang A",
+                                            "Kepala Bidang B",
+                                            "Staf Ahli"
+                                        ],
+                                        "example": "Sekretaris"
+                                    },
+                                    "nip": {
+                                        "type": "string",
+                                        "example": "198512345678901234"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Pejabat berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Pejabat"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Pejabat"
+                ],
+                "summary": "Menghapus pejabat (memerlukan token)",
+                "operationId": "deletePejabat",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Pejabat berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/unduhans": {
+            "get": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Menampilkan daftar semua file unduhan",
+                "operationId": "getUnduhanList",
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Unduhan"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Mengunggah file baru (memerlukan token)",
+                "operationId": "storeUnduhan",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "file"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "description": "Deskripsi file (opsional)",
+                                        "type": "string"
+                                    },
+                                    "file": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "File berhasil diunggah",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Unduhan"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/unduhans/{id}": {
+            "delete": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Menghapus file (memerlukan token)",
+                "operationId": "deleteUnduhan",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "File berhasil dihapus"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/visi-misi": {
+            "get": {
+                "tags": [
+                    "Visi & Misi"
+                ],
+                "summary": "Mendapatkan daftar semua visi dan misi",
+                "description": "Mengembalikan daftar semua visi dan misi yang tersedia dalam sistem",
+                "operationId": "getVisiMisiList",
+                "parameters": [
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "description": "Filter berdasarkan status (active, inactive, all)",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "active",
+                                "inactive",
+                                "all"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Nomor halaman untuk pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Jumlah item per halaman (maksimal 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10,
+                            "maximum": 50,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Daftar visi dan misi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Daftar visi dan misi berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "data": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "$ref": "#/components/schemas/VisiMisi"
+                                                    }
+                                                },
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Parameter tidak valid",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Parameter tidak valid"
+                                        },
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/visi-misi/active": {
+            "get": {
+                "tags": [
+                    "Visi & Misi"
+                ],
+                "summary": "Mendapatkan visi dan misi yang sedang aktif",
+                "description": "Mengembalikan data visi dan misi yang sedang aktif untuk ditampilkan di website publik",
+                "operationId": "getActiveVisiMisi",
+                "responses": {
+                    "200": {
+                        "description": "Visi dan misi aktif berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Visi dan misi aktif berhasil diambil"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/VisiMisi"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Tidak ada visi dan misi yang aktif",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tidak ada visi dan misi yang aktif"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/visi-misi/{id}": {
+            "get": {
+                "tags": [
+                    "Visi & Misi"
+                ],
+                "summary": "Mendapatkan detail visi dan misi berdasarkan ID",
+                "description": "Mengembalikan detail lengkap dari visi dan misi berdasarkan ID yang diberikan",
+                "operationId": "getVisiMisiById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID dari visi dan misi",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detail visi dan misi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Detail visi dan misi berhasil diambil"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/VisiMisi"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Visi dan misi tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Visi dan misi tidak ditemukan"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/visi-misi/statistics": {
+            "get": {
+                "tags": [
+                    "Visi & Misi"
+                ],
+                "summary": "Mendapatkan statistik visi dan misi",
+                "description": "Mengembalikan statistik jumlah visi misi yang aktif dan tidak aktif",
+                "operationId": "getVisiMisiStatistics",
+                "responses": {
+                    "200": {
+                        "description": "Statistik visi dan misi berhasil diambil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Statistik visi dan misi berhasil diambil"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "total": {
+                                                    "description": "Total semua visi misi",
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "active": {
+                                                    "description": "Jumlah visi misi aktif",
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "inactive": {
+                                                    "description": "Jumlah visi misi tidak aktif",
+                                                    "type": "integer",
+                                                    "example": 4
+                                                },
+                                                "latest_update": {
+                                                    "description": "Waktu update terakhir",
+                                                    "type": "string",
+                                                    "format": "date-time",
+                                                    "example": "2025-08-27T10:30:00.000000Z"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Agenda": {
+                "title": "Agenda",
+                "description": "Model untuk data agenda kegiatan dan rapat",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari agenda",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Judul agenda kegiatan atau rapat",
+                        "type": "string",
+                        "example": "Rapat Koordinasi Bulanan BKPSDM"
+                    },
+                    "description": {
+                        "description": "Deskripsi lengkap kegiatan agenda, tempat, dan detail acara",
+                        "type": "string",
+                        "example": "Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan. Acara akan dilaksanakan di ruang rapat lantai 2 gedung BKPSDM pada pukul 09.00 WIB."
+                    },
+                    "file_path": {
+                        "description": "Path relatif ke file dokumen agenda (opsional)",
+                        "type": "string",
+                        "example": "unduhan/agenda-rapat-koordinasi-januari-2025.pdf",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "description": "Waktu agenda dibuat",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-25T08:30:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "Waktu agenda terakhir diperbarui",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-25T10:15:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Berita": {
+                "title": "Berita",
+                "description": "Model untuk data berita",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari berita",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Judul berita",
+                        "type": "string",
+                        "example": "BKPSDM Katingan Mengadakan Pelatihan"
+                    },
+                    "content": {
+                        "description": "Isi lengkap dari berita dalam format HTML",
+                        "type": "string"
+                    },
+                    "thumbnail": {
+                        "description": "Path relatif ke gambar thumbnail",
+                        "type": "string",
+                        "example": "thumbnails/berita/image.jpg"
+                    },
+                    "user_id": {
+                        "description": "ID dari user penulis",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Waktu pembuatan berita",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu terakhir update berita",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Galeri": {
+                "title": "Galeri",
+                "description": "Model untuk data galeri",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari item galeri",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Judul atau caption gambar",
+                        "type": "string",
+                        "example": "Kegiatan Pelatihan Dasar"
+                    },
+                    "image": {
+                        "description": "Path relatif ke file gambar",
+                        "type": "string",
+                        "example": "galeri/image.jpg"
+                    },
+                    "created_at": {
+                        "description": "Waktu upload gambar",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Hero": {
+                "title": "Hero",
+                "description": "Model untuk data slide hero/banner halaman utama",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari slide hero",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Judul utama slide",
+                        "type": "string",
+                        "example": "Selamat Datang di BKPSDM Katingan"
+                    },
+                    "subtitle": {
+                        "description": "Sub judul atau deskripsi slide",
+                        "type": "string",
+                        "example": "Melayani dengan Sepenuh Hati untuk Kemajuan Aparatur"
+                    },
+                    "background_image": {
+                        "description": "Path relatif ke gambar latar belakang",
+                        "type": "string",
+                        "example": "hero/background.jpg"
+                    },
+                    "button_text": {
+                        "description": "Teks tombol call-to-action",
+                        "type": "string",
+                        "example": "Selengkapnya"
+                    },
+                    "button_link": {
+                        "description": "Link tujuan tombol",
+                        "type": "string",
+                        "format": "url",
+                        "example": "https://bkpsdm-katingan.go.id/layanan"
+                    },
+                    "order": {
+                        "description": "Urutan tampil slide",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Waktu slide dibuat",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu terakhir diperbarui",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "KontakMessage": {
+                "title": "Kontak Message",
+                "description": "Model data kontak/pesan dari pengguna",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "John Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "subject": {
+                        "type": "string",
+                        "example": "Subjek Pesan"
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Ini adalah pesan kontak"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-01T00:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-01T00:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Pejabat": {
+                "title": "Pejabat",
+                "description": "Model untuk data struktur pejabat/organisasi",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari pejabat",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Nama lengkap pejabat",
+                        "type": "string",
+                        "example": "Dr. John Doe, S.H., M.Si"
+                    },
+                    "nip": {
+                        "description": "Nomor Induk Pegawai",
+                        "type": "string",
+                        "example": "196501010199103001"
+                    },
+                    "jabatan": {
+                        "description": "Jabatan dalam struktur organisasi",
+                        "type": "string",
+                        "enum": [
+                            "Kepala Badan",
+                            "Sekretaris",
+                            "Kepala Bidang A",
+                            "Kepala Bidang B",
+                            "Staf Ahli"
+                        ],
+                        "example": "Sekretaris"
+                    },
+                    "photo": {
+                        "description": "Path relatif ke foto pejabat",
+                        "type": "string",
+                        "example": "pejabat/photo.jpg"
+                    },
+                    "order": {
+                        "description": "Urutan tampil dalam struktur organisasi",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "description": "Waktu data dibuat",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu terakhir diperbarui",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Unduhan": {
+                "title": "Unduhan",
+                "description": "Model untuk data file unduhan",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari file unduhan",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "description": "Judul atau nama file",
+                        "type": "string",
+                        "example": "Dokumen SOP Kepegawaian 2025"
+                    },
+                    "description": {
+                        "description": "Deskripsi file unduhan",
+                        "type": "string",
+                        "example": "Standar Operasional Prosedur untuk pengelolaan kepegawaian di lingkungan BKPSDM tahun 2025."
+                    },
+                    "file_path": {
+                        "description": "Path relatif ke file di storage",
+                        "type": "string",
+                        "example": "unduhan/dokumen-sop-kepegawaian-2025.pdf"
+                    },
+                    "created_at": {
+                        "description": "Waktu file diunggah",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-25T08:30:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "Waktu file terakhir diperbarui",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-25T10:15:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "User": {
+                "title": "User",
+                "description": "Model untuk data pengguna",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari pengguna",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "description": "Nama lengkap pengguna",
+                        "type": "string",
+                        "example": "Super Administrator"
+                    },
+                    "email": {
+                        "description": "Alamat email pengguna",
+                        "type": "string",
+                        "format": "email",
+                        "example": "superadmin@example.com"
+                    },
+                    "created_at": {
+                        "description": "Waktu pembuatan akun",
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "description": "Waktu terakhir update akun",
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "VisiMisi": {
+                "title": "Visi & Misi",
+                "description": "Model untuk data visi dan misi organisasi",
+                "properties": {
+                    "id": {
+                        "description": "ID unik dari visi misi",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "visi": {
+                        "description": "Visi organisasi",
+                        "type": "string",
+                        "example": "Terwujudnya aparatur sipil negara Kabupaten Katingan yang profesional, berintegritas, dan berorientasi pelayanan publik untuk mendukung terwujudnya tata kelola pemerintahan yang baik."
+                    },
+                    "misi": {
+                        "description": "Daftar misi organisasi",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "Meningkatkan kompetensi dan profesionalisme ASN melalui pengembangan karier dan pelatihan berkelanjutan."
+                        }
+                    },
+                    "is_active": {
+                        "description": "Status aktif visi misi (hanya satu yang boleh aktif)",
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "description": "Waktu visi misi dibuat",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-27T08:30:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "Waktu visi misi terakhir diperbarui",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-08-27T10:15:00.000000Z"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "description": "Masukkan token yang didapat dari endpoint /api/login. Contoh: 1|aBcDeFgHiJkLmNoPqRsTuVwXyZ",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Visi & Misi",
+            "description": "API untuk mengelola data visi dan misi organisasi"
+        },
+        {
+            "name": "Autentikasi",
+            "description": "Endpoint untuk login, logout, dan manajemen profil pengguna"
+        },
+        {
+            "name": "Berita",
+            "description": "Endpoint untuk mengelola berita dan artikel"
+        },
+        {
+            "name": "Galeri",
+            "description": "Endpoint untuk mengelola galeri foto"
+        },
+        {
+            "name": "Unduhan",
+            "description": "Endpoint untuk mengelola file unduhan"
+        },
+        {
+            "name": "Pejabat",
+            "description": "Endpoint untuk mengelola struktur organisasi/pejabat"
+        },
+        {
+            "name": "Hero",
+            "description": "Endpoint untuk mengelola slide hero/banner halaman utama"
+        },
+        {
+            "name": "Kontak",
+            "description": "Endpoint untuk mengelola pesan kontak dari pengguna"
+        },
+        {
+            "name": "Agenda",
+            "description": "Agenda"
+        }
+    ]
+}
