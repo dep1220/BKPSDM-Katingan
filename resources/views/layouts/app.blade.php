@@ -64,5 +64,7 @@
             </div>
         </div>
 
+        <!-- Scripts from child views -->
+        @stack('scripts')
     </body>
 </html>

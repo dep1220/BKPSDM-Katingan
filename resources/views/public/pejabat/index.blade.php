@@ -203,7 +203,7 @@
                     @endforeach
                 @endforeach
                 
-                @if($staff->isEmpty() && $kepalaBidang->isEmpty() && !isset($staffPejabats['Sekretaris']))
+                @if($staff->isEmpty()  && !isset($staffPejabats['Sekretaris']))
                     <div class="text-center py-16">
                         <p class="text-gray-500 text-lg">Belum ada data pejabat yang dimasukkan.</p>
                     </div>

@@ -76,134 +76,87 @@
     </div>
 
     @push('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tinymce@6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
-        tinymce.init({
-            selector: '#content',
-            height: 400,
-            menubar: true,
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            toolbar: 'undo redo | blocks | ' +
-                'bold italic backcolor | alignleft aligncenter ' +
-                'alignright alignjustify | bullist numlist outdent indent | ' +
-                'image | removeformat | help',
-            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
-            branding: false,
-            promotion: false,
-            license_key: 'gpl',
-            // Konfigurasi upload gambar
-            images_upload_url: '{{ route("admin.upload-image") }}',
-            images_upload_handler: function (blobInfo, success, failure, progress) {
-                var xhr, formData;
-                xhr = new XMLHttpRequest();
-                xhr.withCredentials = false;
-                xhr.open('POST', '{{ route("admin.upload-image") }}');
+        console.log('Script dimuat');
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM siap');
+            
+            // Cek apakah TinyMCE tersedia
+            if (typeof tinymce === 'undefined') {
+                console.error('TinyMCE tidak dimuat');
+                return;
+            }
+            
+            console.log('TinyMCE tersedia, inisialisasi...');
+            
+            tinymce.init({
+                selector: '#content',
+                height: 400,
+                menubar: true,
+                plugins: [
+                    'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+                    'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+                    'insertdatetime', 'media', 'table', 'help', 'wordcount'
+                ],
+                toolbar: 'undo redo | blocks | ' +
+                    'bold italic backcolor | alignleft aligncenter ' +
+                    'alignright alignjustify | bullist numlist outdent indent | ' +
+                    'image | removeformat | help',
+                content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }',
+                branding: false,
+                promotion: false,
+                license_key: 'gpl',
                 
-                // Add CSRF token
-                xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
-                
-                xhr.upload.onprogress = function (e) {
-                    if (progress && e.lengthComputable) {
-                        progress(e.loaded / e.total * 100);
-                    }
-                };
-                
-                xhr.onload = function () {
-                    var json;
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        console.log('TinyMCE berhasil diinisialisasi untuk:', editor.id);
+                    });
                     
-                    if (xhr.status === 403) {
-                        failure('HTTP Error: ' + xhr.status, { remove: true });
-                        return;
-                    }
-                    
-                    if (xhr.status < 200 || xhr.status >= 300) {
-                        failure('HTTP Error: ' + xhr.status);
-                        return;
-                    }
-                    
-                    try {
-                        json = JSON.parse(xhr.responseText);
-                        
-                        if (!json || typeof json.location != "string") {
-                            failure('Invalid JSON: ' + xhr.responseText);
-                            return;
-                        }
-                        
-                        success(json.location);
-                    } catch (e) {
-                        failure('Failed to parse response: ' + e.message);
-                    }
-                };
+                    editor.on('change', function() {
+                        editor.save();
+                    });
+                },
                 
-                xhr.onerror = function () {
-                    failure('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
-                };
-                
-                formData = new FormData();
-                formData.append('file', blobInfo.blob(), blobInfo.filename());
-                
-                xhr.send(formData);
-            },
-            // File picker untuk memilih gambar dari komputer
-            file_picker_types: 'image',
-            file_picker_callback: function (callback, value, meta) {
-                if (meta.filetype === 'image') {
-                    var input = document.createElement('input');
-                    input.setAttribute('type', 'file');
-                    input.setAttribute('accept', 'image/*');
+                // Konfigurasi upload gambar (disederhanakan dulu)
+                images_upload_url: '{{ route("admin.upload-image") }}',
+                images_upload_credentials: true,
+                images_upload_handler: function (blobInfo, success, failure, progress) {
+                    console.log('Upload dimulai...');
                     
-                    input.onchange = function () {
-                        var file = this.files[0];
-                        
-                        if (file) {
-                            var formData = new FormData();
-                            formData.append('file', file);
-                            
-                            var xhr = new XMLHttpRequest();
-                            xhr.open('POST', '{{ route("admin.upload-image") }}', true);
-                            xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
-                            
-                            xhr.onload = function() {
-                                if (xhr.status === 200) {
-                                    try {
-                                        var response = JSON.parse(xhr.responseText);
-                                        if (response.location) {
-                                            callback(response.location, {
-                                                title: file.name,
-                                                alt: file.name
-                                            });
-                                        } else {
-                                            alert('Upload failed: No location returned');
-                                        }
-                                    } catch (e) {
-                                        alert('Upload failed: Invalid response');
-                                        console.error('Parse error:', e);
-                                    }
-                                } else {
-                                    alert('Upload failed: HTTP ' + xhr.status);
-                                }
-                            };
-                            
-                            xhr.onerror = function() {
-                                alert('Upload failed: Network error');
-                            };
-                            
-                            xhr.send(formData);
+                    var xhr = new XMLHttpRequest();
+                    xhr.withCredentials = false;
+                    xhr.open('POST', '{{ route("admin.upload-image") }}');
+                    
+                    xhr.setRequestHeader('X-CSRF-TOKEN', '{{ csrf_token() }}');
+                    
+                    xhr.onload = function () {
+                        if (xhr.status === 200) {
+                            try {
+                                var json = JSON.parse(xhr.responseText);
+                                console.log('Upload berhasil:', json);
+                                success(json.location);
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                                failure('Invalid response');
+                            }
+                        } else {
+                            console.error('HTTP Error:', xhr.status);
+                            failure('HTTP Error: ' + xhr.status);
                         }
                     };
                     
-                    input.click();
+                    xhr.onerror = function () {
+                        console.error('Network error');
+                        failure('Network error');
+                    };
+                    
+                    var formData = new FormData();
+                    formData.append('file', blobInfo.blob(), blobInfo.filename());
+                    xhr.send(formData);
                 }
-            },
-            setup: function(editor) {
-                editor.on('change', function() {
-                    editor.save();
-                });
-            }
+            });
         });
     </script>
     @endpush
