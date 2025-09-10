@@ -52,7 +52,7 @@ class PejabatController extends Controller
         
         $data = $request->validate([
             'name' => 'required|string|max:255',
-            'nip' => 'required|string|max:20',
+            'nip' => 'required|string|max:18',
             'jabatan' => ['required', Rule::enum(JabatanEnum::class)],
             'photo' => 'nullable|image|max:2048',
             'order' => 'required|integer',

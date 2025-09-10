@@ -615,7 +615,7 @@
                             </div>
 
                             <!-- Login Admin Button -->
-                            <div class="mt-6 pt-4 border-t border-blue-700 border-opacity-30">
+                            <div class="mt-6 pt-4 border-t border-blue-700 border-opacity-30 hidden md:block">
                                 <a href="{{ route('login') }}"
                                     class="inline-flex items-center px-4 py-2 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-lg text-blue-100 hover:bg-opacity-20 hover:text-white transition-all duration-300 group">
                                     <svg class="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

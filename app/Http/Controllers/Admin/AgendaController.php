@@ -92,7 +92,7 @@ class AgendaController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('unduhan', $filename, 'public');
+            $path = $file->storeAs('agenda', $filename, 'public');
             $data['file_path'] = $path;
         }
 
@@ -156,7 +156,7 @@ class AgendaController extends Controller
 
             $file = $request->file('file');
             $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
-            $path = $file->storeAs('unduhan', $filename, 'public');
+            $path = $file->storeAs('agenda', $filename, 'public');
             $data['file_path'] = $path;
         }
 

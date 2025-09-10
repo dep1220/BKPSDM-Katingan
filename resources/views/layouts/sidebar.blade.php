@@ -51,9 +51,9 @@
                     </x-nav-link>
                 </div>
                 <div class="px-6 py-2">
-                    <x-nav-link :href="route('unduhan.index')" :active="request()->routeIs('unduhan.*')" class="group inline-flex items-center w-full text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('unduhan.*') ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500' : 'text-gray-600' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Manajemen Unduhan</span>
+                    <x-nav-link :href="route('unduhan.index')" :active="request()->routeIs('unduhan.*')" class="group flex items-center w-full text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 hover:bg-rose-50 hover:text-rose-700 {{ request()->routeIs('unduhan.*') ? 'bg-rose-100 text-rose-700 border-l-4 border-rose-500' : 'text-gray-600' }}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="whitespace-nowrap">Manajemen Unduhan</span>
                     </x-nav-link>
                 </div>
                 <div class="px-6 py-2">
@@ -178,9 +178,9 @@
                 <div class="px-6 py-2">
                     <x-nav-link :href="route('unduhan.index')" :active="request()->routeIs('unduhan.*')" 
                                @click="isSidebarOpen = false"
-                               class="group inline-flex items-center w-full text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 hover:bg-blue-50 hover:text-blue-700 {{ request()->routeIs('unduhan.*') ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500' : 'text-gray-600' }}">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        <span>Manajemen Unduhan</span>
+                               class="group flex items-center w-full text-sm font-semibold px-4 py-3 rounded-lg transition-all duration-200 hover:bg-rose-50 hover:text-rose-700 {{ request()->routeIs('unduhan.*') ? 'bg-rose-100 text-rose-700 border-l-4 border-rose-500' : 'text-gray-600' }}">
+                        <svg class="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span class="whitespace-nowrap">Manajemen Unduhan</span>
                     </x-nav-link>
                 </div>
                 <div class="px-6 py-2">
