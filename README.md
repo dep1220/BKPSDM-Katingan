@@ -41,13 +41,13 @@ Website resmi **Badan Kepegawaian dan Pengembangan Sumber Daya Manusia (BKPSDM) 
 ## 🛠️ Teknologi & Dependencies
 
 ### Core Framework
-- **Laravel 11.x** - PHP framework utama
-- **PHP 8.3+** - Server-side scripting
-- **MySQL/SQLite** - Database management
+- **Laravel 11.45.1** - PHP framework utama
+- **PHP 8.3.24** - Server-side scripting
+- **MySQL** - Database management
 
 ### Frontend Stack
-- **Tailwind CSS 3.x** - Utility-first CSS framework
-- **Alpine.js 3.x** - Reactive JavaScript framework
+- **Tailwind CSS 3.1.0** - Utility-first CSS framework
+- **Alpine.js 3.4.2** - Reactive JavaScript framework
 - **Vite** - Build tool dan module bundler
 - **Swiper.js** - Touch slider component
 - **TinyMCE** - Rich text editor
