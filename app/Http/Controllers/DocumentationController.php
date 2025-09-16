@@ -7,15 +7,6 @@ namespace App\Http\Controllers;
  * title="API Dokumentasi BKPSDM Katingan",
  * version="1.0.0",
  * description="Ini adalah dokumentasi API yang digunakan untuk website BKPSDM Katingan.",
- * @OA\Contact(
- * name="Developer",
- * email="deprowinoto3690@gmail.com"
- * )
- * )
- * 
- * @OA\Server(
- * url="http://127.0.0.1:8000",
- * description="Local Development Server"
  * )
  * 
  * @OA\Components(

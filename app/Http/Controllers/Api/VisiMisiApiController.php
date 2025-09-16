@@ -214,47 +214,443 @@ class VisiMisiApiController extends Controller
     }
 
     /**
-     * @OA\Get(
-     *     path="/api/visi-misi/statistics",
-     *     operationId="getVisiMisiStatistics",
+     * @OA\Post(
+     *     path="/api/visi-misi",
+     *     operationId="storeVisiMisi",
      *     tags={"Visi & Misi"},
-     *     summary="Mendapatkan statistik visi dan misi",
-     *     description="Mengembalikan statistik jumlah visi misi yang aktif dan tidak aktif",
+     *     summary="Menyimpan visi dan misi baru",
+     *     description="Menyimpan data visi dan misi baru ke database dan mengaktifkannya",
+     *     security={{"sanctum": {}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data visi dan misi yang akan disimpan",
+     *         @OA\JsonContent(
+     *             required={"visi", "misi"},
+     *             @OA\Property(
+     *                 property="visi",
+     *                 type="string",
+     *                 description="Teks visi organisasi (minimal 20 karakter)",
+     *                 example="Menjadi institusi terdepan dalam pengembangan sumber daya manusia yang profesional dan berintegritas"
+     *             ),
+     *             @OA\Property(
+     *                 property="misi",
+     *                 type="array",
+     *                 description="Array berisi misi organisasi (minimal 1 misi, setiap misi minimal 10 karakter)",
+     *                 @OA\Items(
+     *                     type="string",
+     *                     example="Mengembangkan kompetensi aparatur sipil negara"
+     *                 ),
+     *                 minItems=1
+     *             )
+     *         )
+     *     ),
      *     @OA\Response(
-     *         response=200,
-     *         description="Statistik visi dan misi berhasil diambil",
+     *         response=201,
+     *         description="Visi dan misi berhasil disimpan",
      *         @OA\JsonContent(
      *             type="object",
      *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Statistik visi dan misi berhasil diambil"),
+     *             @OA\Property(property="message", type="string", example="Visi dan Misi berhasil ditambahkan dan diaktifkan"),
+     *             @OA\Property(property="data", ref="#/components/schemas/VisiMisi")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Data tidak valid",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Data tidak valid"),
      *             @OA\Property(
-     *                 property="data",
+     *                 property="errors",
      *                 type="object",
-     *                 @OA\Property(property="total", type="integer", example=5, description="Total semua visi misi"),
-     *                 @OA\Property(property="active", type="integer", example=1, description="Jumlah visi misi aktif"),
-     *                 @OA\Property(property="inactive", type="integer", example=4, description="Jumlah visi misi tidak aktif"),
-     *                 @OA\Property(property="latest_update", type="string", format="date-time", example="2025-08-27T10:30:00.000000Z", description="Waktu update terakhir")
+     *                 @OA\Property(
+     *                     property="visi",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="Visi minimal 20 karakter.")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="misi",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="Minimal harus ada 1 misi.")
+     *                 )
      *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Tidak terautentikasi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
      *         )
      *     )
      * )
      */
-    public function statistics()
+    public function store(Request $request)
     {
-        $total = VisiMisi::count();
-        $active = VisiMisi::where('is_active', true)->count();
-        $inactive = VisiMisi::where('is_active', false)->count();
-        $latestUpdate = VisiMisi::latest('updated_at')->first()?->updated_at;
+        $request->validate([
+            'visi' => 'required|string|min:20',
+            'misi' => 'required|array|min:1',
+            'misi.*' => 'required|string|min:10',
+        ], [
+            'visi.required' => 'Visi wajib diisi.',
+            'visi.min' => 'Visi minimal 20 karakter.',
+            'misi.required' => 'Misi wajib diisi.',
+            'misi.min' => 'Minimal harus ada 1 misi.',
+            'misi.*.required' => 'Setiap misi wajib diisi.',
+            'misi.*.min' => 'Setiap misi minimal 10 karakter.',
+        ]);
+
+        // Set semua visi misi lain menjadi tidak aktif
+        VisiMisi::query()->update(['is_active' => false]);
+
+        // Bersihkan array misi dari nilai kosong
+        $misi = array_filter($request->misi, function($item) {
+            return !empty(trim($item));
+        });
+
+        $visiMisi = VisiMisi::create([
+            'visi' => $request->visi,
+            'misi' => array_values($misi), // Reset index array
+            'is_active' => true,
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Statistik visi dan misi berhasil diambil',
-            'data' => [
-                'total' => $total,
-                'active' => $active,
-                'inactive' => $inactive,
-                'latest_update' => $latestUpdate,
-            ]
+            'message' => 'Visi dan Misi berhasil ditambahkan dan diaktifkan',
+            'data' => $visiMisi
+        ], 201);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/visi-misi/{id}",
+     *     operationId="updateVisiMisi",
+     *     tags={"Visi & Misi"},
+     *     summary="Memperbarui visi dan misi",
+     *     description="Memperbarui data visi dan misi yang sudah ada",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dari visi dan misi yang akan diperbarui",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         description="Data visi dan misi yang akan diperbarui",
+     *         @OA\JsonContent(
+     *             required={"visi", "misi"},
+     *             @OA\Property(
+     *                 property="visi",
+     *                 type="string",
+     *                 description="Teks visi organisasi (minimal 20 karakter)",
+     *                 example="Menjadi institusi terdepan dalam pengembangan sumber daya manusia yang profesional dan berintegritas"
+     *             ),
+     *             @OA\Property(
+     *                 property="misi",
+     *                 type="array",
+     *                 description="Array berisi misi organisasi (minimal 1 misi, setiap misi minimal 10 karakter)",
+     *                 @OA\Items(
+     *                     type="string",
+     *                     example="Mengembangkan kompetensi aparatur sipil negara"
+     *                 ),
+     *                 minItems=1
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Visi dan misi berhasil diperbarui",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Visi dan Misi berhasil diperbarui"),
+     *             @OA\Property(property="data", ref="#/components/schemas/VisiMisi")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Data tidak valid",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Data tidak valid"),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="visi",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="Visi minimal 20 karakter.")
+     *                 ),
+     *                 @OA\Property(
+     *                     property="misi",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="Minimal harus ada 1 misi.")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Visi dan misi tidak ditemukan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Visi dan misi tidak ditemukan")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Tidak terautentikasi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     */
+    public function update(Request $request, $id)
+    {
+        $visiMisi = VisiMisi::find($id);
+
+        if (!$visiMisi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visi dan misi tidak ditemukan'
+            ], 404);
+        }
+
+        $request->validate([
+            'visi' => 'required|string|min:20',
+            'misi' => 'required|array|min:1',
+            'misi.*' => 'required|string|min:10',
+        ], [
+            'visi.required' => 'Visi wajib diisi.',
+            'visi.min' => 'Visi minimal 20 karakter.',
+            'misi.required' => 'Misi wajib diisi.',
+            'misi.min' => 'Minimal harus ada 1 misi.',
+            'misi.*.required' => 'Setiap misi wajib diisi.',
+            'misi.*.min' => 'Setiap misi minimal 10 karakter.',
+        ]);
+
+        // Bersihkan array misi dari nilai kosong
+        $misi = array_filter($request->misi, function($item) {
+            return !empty(trim($item));
+        });
+
+        $visiMisi->update([
+            'visi' => $request->visi,
+            'misi' => array_values($misi), // Reset index array
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Visi dan Misi berhasil diperbarui',
+            'data' => $visiMisi->fresh()
+        ]);
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/visi-misi/{id}",
+     *     operationId="deleteVisiMisi",
+     *     tags={"Visi & Misi"},
+     *     summary="Menghapus visi dan misi",
+     *     description="Menghapus data visi dan misi dari database",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dari visi dan misi yang akan dihapus",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Visi dan misi berhasil dihapus",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Visi dan Misi berhasil dihapus")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Visi dan misi tidak ditemukan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Visi dan misi tidak ditemukan")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Tidak terautentikasi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     */
+    public function destroy($id)
+    {
+        $visiMisi = VisiMisi::find($id);
+
+        if (!$visiMisi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visi dan misi tidak ditemukan'
+            ], 404);
+        }
+
+        $visiMisi->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Visi dan Misi berhasil dihapus'
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/visi-misi/{id}/activate",
+     *     operationId="activateVisiMisi",
+     *     tags={"Visi & Misi"},
+     *     summary="Mengaktifkan visi dan misi",
+     *     description="Mengaktifkan visi dan misi tertentu dan menonaktifkan yang lain",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dari visi dan misi yang akan diaktifkan",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Visi dan misi berhasil diaktifkan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Visi dan Misi berhasil diaktifkan"),
+     *             @OA\Property(property="data", ref="#/components/schemas/VisiMisi")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Visi dan misi tidak ditemukan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Visi dan misi tidak ditemukan")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Tidak terautentikasi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     */
+    public function activate($id)
+    {
+        $visiMisi = VisiMisi::find($id);
+
+        if (!$visiMisi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visi dan misi tidak ditemukan'
+            ], 404);
+        }
+
+        // Set semua visi misi lain menjadi tidak aktif
+        VisiMisi::query()->update(['is_active' => false]);
+        
+        // Aktifkan visi misi yang dipilih
+        $visiMisi->update(['is_active' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Visi dan Misi berhasil diaktifkan',
+            'data' => $visiMisi->fresh()
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/visi-misi/{id}/deactivate",
+     *     operationId="deactivateVisiMisi",
+     *     tags={"Visi & Misi"},
+     *     summary="Menonaktifkan visi dan misi",
+     *     description="Menonaktifkan visi dan misi tertentu",
+     *     security={{"sanctum": {}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         description="ID dari visi dan misi yang akan dinonaktifkan",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Visi dan misi berhasil dinonaktifkan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Visi dan Misi berhasil dinonaktifkan"),
+     *             @OA\Property(property="data", ref="#/components/schemas/VisiMisi")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Visi dan misi tidak ditemukan",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Visi dan misi tidak ditemukan")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Tidak terautentikasi",
+     *         @OA\JsonContent(
+     *             type="object",
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Unauthenticated")
+     *         )
+     *     )
+     * )
+     */
+    public function deactivate($id)
+    {
+        $visiMisi = VisiMisi::find($id);
+
+        if (!$visiMisi) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Visi dan misi tidak ditemukan'
+            ], 404);
+        }
+
+        // Nonaktifkan visi misi yang dipilih
+        $visiMisi->update(['is_active' => false]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Visi dan Misi berhasil dinonaktifkan',
+            'data' => $visiMisi->fresh()
         ]);
     }
 }
