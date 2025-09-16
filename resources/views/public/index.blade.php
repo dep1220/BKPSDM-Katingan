@@ -50,14 +50,97 @@
             <div class="swiper-button-prev" aria-label="Slide sebelumnya"></div>
         </div>
         <script>
-            const heroSwiper = new Swiper('.swiper-container', {
-                loop: true,
-                autoplay: { delay: 5000, disableOnInteraction: false },
-                pagination: { el: '.swiper-pagination', clickable: true },
-                navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-                effect: 'fade',
-                fadeEffect: { crossFade: true },
-                keyboard: { enabled: true },
+            document.addEventListener('DOMContentLoaded', function() {
+                // Hitung jumlah slide yang tersedia
+                const slides = document.querySelectorAll('.swiper-slide');
+                const slideCount = slides.length;
+                
+                // Konfigurasi dasar Swiper
+                const swiperConfig = {
+                    autoplay: { delay: 5000, disableOnInteraction: false },
+                    pagination: { el: '.swiper-pagination', clickable: true },
+                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+                    effect: 'fade',
+                    fadeEffect: { crossFade: true },
+                    keyboard: { enabled: true },
+                    
+                    // Nonaktifkan loop jika slides kurang dari 2
+                    loop: slideCount > 1,
+                    
+                    // Nonaktifkan autoplay jika hanya ada 1 slide
+                    autoplay: slideCount > 1 ? { delay: 5000, disableOnInteraction: false } : false,
+                    
+                    // Sembunyikan navigation jika hanya ada 1 slide
+                    allowTouchMove: slideCount > 1,
+                };
+                
+                // Inisialisasi Swiper
+                const heroSwiper = new Swiper('.swiper-container', swiperConfig);
+                
+                // Auto-hide navigation enhancement
+                const swiperContainer = document.querySelector('.swiper-container');
+                const nextBtn = document.querySelector('.swiper-button-next');
+                const prevBtn = document.querySelector('.swiper-button-prev');
+                let hideTimeout;
+                
+                if (swiperContainer && slideCount > 1) {
+                    // Function to show navigation
+                    function showNavigation() {
+                        if (nextBtn) nextBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: scale(1) !important;';
+                        if (prevBtn) prevBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: scale(1) !important;';
+                        
+                        // Clear existing timeout
+                        clearTimeout(hideTimeout);
+                        
+                        // Set timeout to hide navigation after 3 seconds of inactivity
+                        hideTimeout = setTimeout(hideNavigation, 3000);
+                    }
+                    
+                    // Function to hide navigation
+                    function hideNavigation() {
+                        if (nextBtn) nextBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: scale(0.8) !important;';
+                        if (prevBtn) prevBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: scale(0.8) !important;';
+                    }
+                    
+                    // Show navigation on various interactions
+                    swiperContainer.addEventListener('mouseenter', showNavigation);
+                    swiperContainer.addEventListener('mousemove', showNavigation);
+                    swiperContainer.addEventListener('touchstart', showNavigation);
+                    swiperContainer.addEventListener('touchmove', showNavigation);
+                    swiperContainer.addEventListener('focus', showNavigation, true);
+                    
+                    // Keep navigation visible while hovering over buttons
+                    if (nextBtn) {
+                        nextBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+                        nextBtn.addEventListener('mouseleave', () => {
+                            hideTimeout = setTimeout(hideNavigation, 1000);
+                        });
+                    }
+                    
+                    if (prevBtn) {
+                        prevBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
+                        prevBtn.addEventListener('mouseleave', () => {
+                            hideTimeout = setTimeout(hideNavigation, 1000);
+                        });
+                    }
+                    
+                    // Show navigation briefly on slide change
+                    heroSwiper.on('slideChange', () => {
+                        showNavigation();
+                    });
+                    
+                    // Initial state - hide navigation after 2 seconds
+                    setTimeout(hideNavigation, 2000);
+                }
+                
+                // Sembunyikan navigasi dan pagination jika hanya ada 1 slide
+                if (slideCount <= 1) {
+                    const pagination = document.querySelector('.swiper-pagination');
+                    
+                    if (pagination) pagination.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    if (prevBtn) prevBtn.style.display = 'none';
+                }
             });
         </script>
     </section>

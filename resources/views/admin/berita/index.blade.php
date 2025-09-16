@@ -113,7 +113,7 @@
                                 
                                 <div class="flex-1 min-w-0">
                                     <h3 class="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{{ $berita->title }}</h3>
-                                    <p class="text-xs text-gray-500 mb-2 line-clamp-2">{{ Str::limit(strip_tags($berita->content), 80) }}</p>
+                                    <p class="text-xs text-gray-500 mb-2 line-clamp-2">{{ Str::limit(html_entity_decode(strip_tags($berita->content)), 80) }}</p>
                                     
                                     <div class="flex items-center gap-2 mb-2">
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
@@ -228,7 +228,7 @@
                                             @endif
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">{{ Str::limit($berita->title, 40) }}</div>
-                                                <div class="text-sm text-gray-500">{{ Str::limit(strip_tags($berita->content), 60) }}</div>
+                                                <div class="text-sm text-gray-500">{{ Str::limit(html_entity_decode(strip_tags($berita->content)), 60) }}</div>
                                                 @if($berita->lampiran_file)
                                                     <div class="mt-1">
                                                         <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
