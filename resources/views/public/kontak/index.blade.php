@@ -446,8 +446,6 @@
 
             // Clear previous input
             document.getElementById('captcha').value = '';
-
-            console.log('New CAPTCHA generated:', captcha);
         }
 
         // Validate CAPTCHA before form submission (removed alerts - using server validation instead)

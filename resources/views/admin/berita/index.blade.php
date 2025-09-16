@@ -115,13 +115,35 @@
                                     <h3 class="text-sm font-medium text-gray-900 mb-1 line-clamp-2">{{ $berita->title }}</h3>
                                     <p class="text-xs text-gray-500 mb-2 line-clamp-2">{{ Str::limit(strip_tags($berita->content), 80) }}</p>
                                     
-                                    <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                            @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                                bg-purple-100 text-purple-800
+                                            @elseif($berita->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                                bg-red-100 text-red-800
+                                            @else
+                                                bg-blue-100 text-blue-800
+                                            @endif">
+                                            {{ $berita->kategori->label() }}
+                                        </span>
                                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $berita->status == \App\Enums\BeritaStatus::PUBLISHED ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                                             <div class="w-1.5 h-1.5 rounded-full mr-1 {{ $berita->status == \App\Enums\BeritaStatus::PUBLISHED ? 'bg-green-400' : 'bg-yellow-400' }}"></div>
                                             {{ $berita->status->label() }}
                                         </span>
-                                        <span class="text-xs text-gray-500">{{ $berita->created_at->format('d M Y') }}</span>
                                     </div>
+                                    
+                                    @if($berita->lampiran_file)
+                                        <div class="mb-2">
+                                            <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                                               target="_blank"
+                                               class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                                </svg>
+                                                Unduh Lampiran
+                                            </a>
+                                        </div>
+                                    @endif
                                     
                                     <div class="flex items-center justify-between">
                                         <div class="flex items-center text-xs text-gray-500">
@@ -129,6 +151,7 @@
                                                 <span class="text-xs font-medium text-gray-700">{{ substr($berita->user->name, 0, 1) }}</span>
                                             </div>
                                             {{ $berita->user->name }}
+                                            <span class="ml-2">{{ $berita->created_at->format('d M Y') }}</span>
                                         </div>
                                         
                                         <div class="flex space-x-3">
@@ -182,6 +205,7 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Berita</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kategori</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Penulis</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
@@ -205,8 +229,32 @@
                                             <div>
                                                 <div class="text-sm font-medium text-gray-900">{{ Str::limit($berita->title, 40) }}</div>
                                                 <div class="text-sm text-gray-500">{{ Str::limit(strip_tags($berita->content), 60) }}</div>
+                                                @if($berita->lampiran_file)
+                                                    <div class="mt-1">
+                                                        <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                                                           target="_blank"
+                                                           class="inline-flex items-center text-xs text-blue-600 hover:text-blue-800">
+                                                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                                            </svg>
+                                                            Unduh Lampiran
+                                                        </a>
+                                                    </div>
+                                                @endif
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                                bg-purple-100 text-purple-800
+                                            @elseif($berita->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                                bg-red-100 text-red-800
+                                            @else
+                                                bg-blue-100 text-blue-800
+                                            @endif">
+                                            {{ $berita->kategori->label() }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="flex items-center">

@@ -608,7 +608,7 @@
                                 </div>
                                 <a href="mailto:info@bkpsdm-katingan.go.id"
                                     class="text-blue-100 text-sm hover:text-white transition-colors">
-                                    info@bkpsdm-katingan.go.id
+                                    bkpsdm@katingankab.go.id
                                 </a>
                             </div>
 

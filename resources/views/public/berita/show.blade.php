@@ -62,15 +62,99 @@
                     </div>
                 </div>
 
-                {{-- Gambar Utama --}}
+                {{-- Gambar Utama / Preview File --}}
                 <div class="mb-6 md:mb-8">
-                    <img src="{{ $berita->thumbnail ? asset('storage/' . $berita->thumbnail) : 'https://placehold.co/1200x600/e2e8f0/adb5bd?text=Berita' }}" alt="{{ $berita->title }}" class="w-full rounded-lg shadow-lg protected-content" draggable="false">
+                    @if($berita->thumbnail)
+                        <img src="{{ asset('storage/' . $berita->thumbnail) }}" 
+                             alt="{{ $berita->title }}" 
+                             class="w-full rounded-lg shadow-lg protected-content" 
+                             draggable="false">
+                    @elseif($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $berita->lampiran_file)
+                        {{-- Preview file untuk pengumuman tanpa thumbnail --}}
+                        <div class="w-full bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-lg p-8 border-2 border-purple-200">
+                            <div class="flex flex-col items-center justify-center text-center">
+                                <img src="{{ $berita->getFilePreviewUrl() }}" 
+                                     alt="Preview {{ $berita->getFileExtension() }} file" 
+                                     class="w-32 h-40 object-contain mb-4">
+                                <h3 class="text-lg font-semibold text-purple-800 mb-2">
+                                    Dokumen {{ strtoupper($berita->getFileExtension()) }}
+                                </h3>
+                                <p class="text-purple-600 mb-4 text-sm">
+                                    Klik tombol di bawah untuk mengunduh atau membuka dokumen
+                                </p>
+                                <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                                   target="_blank"
+                                   class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    {{ $berita->getFileIcon() }} Unduh/Buka File
+                                </a>
+                            </div>
+                        </div>
+                    @else
+                        <div class="w-full h-64 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg shadow-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <svg class="w-16 h-16 text-blue-300 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V8h2v9zm4 0h-2v-4h2v4z"/>
+                                </svg>
+                                <p class="text-blue-400 text-sm">Gambar tidak tersedia</p>
+                            </div>
+                        </div>
+                    @endif
+                    
+                    {{-- Badge Kategori --}}
+                    <div class="mt-4 flex justify-start">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                            @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                bg-purple-100 text-purple-800
+                            @elseif($berita->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                bg-red-100 text-red-800
+                            @else
+                                bg-blue-100 text-blue-800
+                            @endif">
+                            {{ $berita->kategori->label() }}
+                        </span>
+                    </div>
                 </div>
 
                 {{-- Konten Artikel --}}
                 <div class="prose max-w-none lg:prose-lg text-gray-700 protected-content" id="berita-content">
                     {!! $berita->content !!}
                 </div>
+
+                {{-- File Lampiran (jika ada dan ada thumbnail) --}}
+                @if($berita->hasDownloadableFile() && $berita->thumbnail)
+                    <div class="mt-8 p-6 bg-purple-50 border border-purple-200 rounded-lg">
+                        <h3 class="text-lg font-semibold text-purple-800 mb-4 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                            </svg>
+                            File Lampiran
+                        </h3>
+                        <div class="flex items-center justify-between bg-white p-4 rounded-lg border border-purple-100">
+                            <div class="flex items-center space-x-3">
+                                <div class="text-2xl">{{ $berita->getFileIcon() }}</div>
+                                <div>
+                                    <p class="font-medium text-gray-900">
+                                        Dokumen {{ strtoupper($berita->getFileExtension()) }}
+                                    </p>
+                                    <p class="text-sm text-gray-500">
+                                        Klik untuk mengunduh atau membuka di tab baru
+                                    </p>
+                                </div>
+                            </div>
+                            <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                               target="_blank"
+                               class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-300 text-sm">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Unduh/Buka
+                            </a>
+                        </div>
+                    </div>
+                @endif
 
                 {{-- Tombol Kembali --}}
                 <div class="mt-8 md:mt-12 border-t pt-6">
@@ -89,18 +173,10 @@
     // Data berita untuk sharing
     const currentUrl = window.location.href;
     const beritaTitle = `{{ addslashes($berita->title) }}`;
-    const beritaDescription = `{{ addslashes(Str::limit(strip_tags($berita->content), 100)) }}`;
-    
-    console.log('Share data loaded:', {
-        url: currentUrl,
-        title: beritaTitle,
-        description: beritaDescription
-    });
+    const beritaDescription = `{{ addslashes(Str::limit(html_entity_decode(strip_tags($berita->content)), 100)) }}`;
 
     // Fungsi copy link yang simpel
     function copyLinkToClipboard() {
-        console.log('Copy function called');
-        
         // Metode 1: Clipboard API modern
         if (navigator.clipboard) {
             navigator.clipboard.writeText(currentUrl).then(() => {
@@ -140,7 +216,6 @@
 
     // Fungsi share WhatsApp
     function shareWhatsApp() {
-        console.log('WhatsApp share called');
         const text = `*${beritaTitle}*\n\n${beritaDescription}\n\nBaca selengkapnya: ${currentUrl}`;
         const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
         
@@ -150,7 +225,6 @@
 
     // Fungsi share Facebook
     function shareFacebook() {
-        console.log('Facebook share called');
         const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
         
         window.open(fbUrl, '_blank', 'width=600,height=400');
@@ -159,7 +233,6 @@
 
     // Fungsi share Twitter
     function shareTwitter() {
-        console.log('Twitter share called');
         const text = `${beritaTitle} - ${beritaDescription}`;
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(currentUrl)}`;
         
@@ -223,11 +296,11 @@
 
     // Test fungsi saat halaman dimuat
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('Share buttons ready!');
+        // Share buttons ready
         
         // Test click event pada tombol pertama
         setTimeout(() => {
-            console.log('All share functions loaded successfully');
+            // All share functions loaded successfully
         }, 1000);
     });
 </script>

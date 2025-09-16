@@ -99,6 +99,23 @@ class BeritaController extends Controller
     }
     
     /**
+     * Store attachment file (PDF/Word)
+     */
+    private function storeAttachmentFile($attachmentFile, $folder = 'attachments/berita')
+    {
+        // Generate unique filename dengan ekstensi asli
+        $originalName = $attachmentFile->getClientOriginalName();
+        $extension = $attachmentFile->getClientOriginalExtension();
+        $filename = uniqid() . '_' . time() . '.' . $extension;
+        $path = $folder . '/' . $filename;
+        
+        // Store file ke storage/app/public menggunakan disk public
+        $attachmentFile->storeAs($folder, $filename, 'public');
+        
+        return $path;
+    }
+    
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -144,16 +161,25 @@ class BeritaController extends Controller
         // 2. Tambahkan user_id ke variabel $data yang sama
         $data['user_id'] = Auth::id(); // <-- INI PERBAIKANNYA
 
-        // 3. Tambahkan status ke variabel $data yang sama
-        $data['status'] = \App\Enums\BeritaStatus::DRAFT;
+        // 3. Status sudah ada dari validated data, tidak perlu set manual
 
-        // 4. Handle thumbnail (wajib untuk create)
-        $data['thumbnail'] = $this->compressAndStoreImage($request->file('thumbnail'));
+        // 4. Handle thumbnail (opsional untuk pengumuman, wajib untuk lainnya)
+        if ($request->hasFile('thumbnail')) {
+            $data['thumbnail'] = $this->compressAndStoreImage($request->file('thumbnail'));
+        } elseif ($data['kategori'] !== \App\Enums\BeritaKategori::PENGUMUMAN->value) {
+            // Thumbnail wajib untuk kategori selain pengumuman
+            return back()->withErrors(['thumbnail' => 'Thumbnail wajib untuk kategori ini.'])->withInput();
+        }
 
-        // 5. Buat record baru menggunakan $data yang sudah lengkap
+        // 5. Handle file lampiran untuk kategori pengumuman
+        if ($request->hasFile('lampiran_file') && $data['kategori'] === \App\Enums\BeritaKategori::PENGUMUMAN->value) {
+            $data['lampiran_file'] = $this->storeAttachmentFile($request->file('lampiran_file'));
+        }
+
+        // 6. Buat record baru menggunakan $data yang sudah lengkap
         $berita = Berita::create($data);
 
-        // 6. Log activity
+        // 7. Log activity
         $this->logCreate($berita, "Menambahkan berita baru: {$berita->title}");
 
         return redirect()->route('beritas.index')->with('success', 'Berita berhasil ditambahkan!');
@@ -198,6 +224,25 @@ class BeritaController extends Controller
             unset($validatedData['thumbnail']);
         }
 
+        // Handle file lampiran untuk kategori pengumuman
+        if ($request->hasFile('lampiran_file') && $validatedData['kategori'] === \App\Enums\BeritaKategori::PENGUMUMAN->value) {
+            // Hapus file lampiran lama jika ada
+            if ($berita->lampiran_file) {
+                Storage::disk('public')->delete($berita->lampiran_file);
+            }
+            // Upload file lampiran baru
+            $validatedData['lampiran_file'] = $this->storeAttachmentFile($request->file('lampiran_file'));
+        } elseif ($validatedData['kategori'] !== \App\Enums\BeritaKategori::PENGUMUMAN->value) {
+            // Jika kategori bukan pengumuman, hapus file lampiran
+            if ($berita->lampiran_file) {
+                Storage::disk('public')->delete($berita->lampiran_file);
+            }
+            $validatedData['lampiran_file'] = null;
+        } elseif (!$request->hasFile('lampiran_file')) {
+            // Jika tidak ada file baru, hapus lampiran_file dari validated data agar tidak di-update
+            unset($validatedData['lampiran_file']);
+        }
+
         $berita->update($validatedData);
 
         // Log activity dengan perubahan
@@ -229,7 +274,7 @@ class BeritaController extends Controller
     public function uploadImage(Request $request)
     {
         $request->validate([
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // Max 10MB
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // Max 2MB
         ]);
 
         try {

@@ -600,6 +600,31 @@
                 ],
                 "summary": "Menampilkan daftar berita yang sudah dipublikasi",
                 "operationId": "getBeritaList",
+                "parameters": [
+                    {
+                        "name": "kategori",
+                        "in": "query",
+                        "description": "Filter berdasarkan kategori berita",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "pengumuman",
+                                "berita_harian",
+                                "berita_utama"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "search",
+                        "in": "query",
+                        "description": "Pencarian berdasarkan judul atau konten",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Operasi berhasil",
@@ -634,16 +659,43 @@
                             "schema": {
                                 "required": [
                                     "title",
-                                    "content"
+                                    "content",
+                                    "kategori",
+                                    "status"
                                 ],
                                 "properties": {
                                     "title": {
+                                        "description": "Judul berita",
                                         "type": "string"
                                     },
                                     "content": {
+                                        "description": "Isi berita dalam format HTML",
                                         "type": "string"
                                     },
+                                    "kategori": {
+                                        "description": "Kategori berita",
+                                        "type": "string",
+                                        "enum": [
+                                            "pengumuman",
+                                            "berita_harian",
+                                            "berita_utama"
+                                        ]
+                                    },
+                                    "status": {
+                                        "description": "Status publikasi",
+                                        "type": "string",
+                                        "enum": [
+                                            "draft",
+                                            "published"
+                                        ]
+                                    },
                                     "thumbnail": {
+                                        "description": "Gambar thumbnail (opsional untuk pengumuman)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "lampiran_file": {
+                                        "description": "File lampiran PDF/Word (khusus untuk pengumuman)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -666,6 +718,9 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -727,26 +782,49 @@
                 "requestBody": {
                     "required": true,
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "required": [
                                     "title",
                                     "content",
+                                    "kategori",
                                     "status"
                                 ],
                                 "properties": {
                                     "title": {
+                                        "description": "Judul berita",
                                         "type": "string"
                                     },
                                     "content": {
+                                        "description": "Isi berita dalam format HTML",
                                         "type": "string"
                                     },
+                                    "kategori": {
+                                        "description": "Kategori berita",
+                                        "type": "string",
+                                        "enum": [
+                                            "pengumuman",
+                                            "berita_harian",
+                                            "berita_utama"
+                                        ]
+                                    },
                                     "status": {
+                                        "description": "Status publikasi",
                                         "type": "string",
                                         "enum": [
                                             "draft",
                                             "published"
                                         ]
+                                    },
+                                    "thumbnail": {
+                                        "description": "Gambar thumbnail baru (opsional)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "lampiran_file": {
+                                        "description": "File lampiran baru (opsional, khusus pengumuman)",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -767,6 +845,12 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Berita tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -797,6 +881,9 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Berita tidak ditemukan"
                     }
                 },
                 "security": [
@@ -804,6 +891,36 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/beritas/{id}/download": {
+            "get": {
+                "tags": [
+                    "Berita"
+                ],
+                "summary": "Mengunduh file lampiran berita (khusus pengumuman)",
+                "operationId": "downloadBeritaAttachment",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File berhasil diunduh"
+                    },
+                    "404": {
+                        "description": "File tidak ditemukan atau berita bukan pengumuman"
+                    },
+                    "422": {
+                        "description": "Berita tidak memiliki file lampiran"
+                    }
+                }
             }
         },
         "/api/galeris": {
@@ -2120,12 +2237,43 @@
                     "thumbnail": {
                         "description": "Path relatif ke gambar thumbnail",
                         "type": "string",
-                        "example": "thumbnails/berita/image.jpg"
+                        "example": "thumbnails/berita/image.jpg",
+                        "nullable": true
+                    },
+                    "kategori": {
+                        "description": "Kategori berita",
+                        "type": "string",
+                        "enum": [
+                            "pengumuman",
+                            "berita_harian",
+                            "berita_utama"
+                        ],
+                        "example": "pengumuman"
+                    },
+                    "status": {
+                        "description": "Status publikasi berita",
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "published"
+                        ],
+                        "example": "published"
+                    },
+                    "lampiran_file": {
+                        "description": "Path relatif ke file lampiran (untuk kategori pengumuman)",
+                        "type": "string",
+                        "example": "attachments/berita/document.pdf",
+                        "nullable": true
                     },
                     "user_id": {
                         "description": "ID dari user penulis",
                         "type": "integer",
                         "example": 1
+                    },
+                    "slug": {
+                        "description": "Slug URL-friendly dari judul berita",
+                        "type": "string",
+                        "example": "bkpsdm-katingan-mengadakan-pelatihan"
                     },
                     "created_at": {
                         "description": "Waktu pembuatan berita",

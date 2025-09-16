@@ -154,12 +154,78 @@
                             <article class="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300">
                                 <div class="flex flex-col lg:flex-row">
                                     <div class="lg:w-1/2">
-                                        <a href="{{ route('public.berita.show', $featured) }}" class="block group">
-                                            <img src="{{ $featured->thumbnail ? asset('storage/' . $featured->thumbnail) : 'https://placehold.co/800x500/e2e8f0/adb5bd?text=Berita' }}" 
-                                                 alt="{{ $featured->title }}" 
-                                                 class="w-full h-56 sm:h-64 md:h-72 lg:h-full object-cover group-hover:scale-105 transition-transform duration-300" 
-                                                 loading="lazy">
-                                        </a>
+                                        <div class="relative">
+                                            <a href="{{ route('public.berita.show', $featured) }}" class="block group">
+                                                @if($featured->thumbnail)
+                                                    <img src="{{ asset('storage/' . $featured->thumbnail) }}" 
+                                                         alt="{{ $featured->title }}" 
+                                                         class="w-full h-56 sm:h-64 md:h-72 lg:h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                                                         loading="lazy">
+                                                @elseif($featured->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $featured->lampiran_file && !$featured->thumbnail)
+                                                    {{-- Preview file untuk pengumuman tanpa thumbnail --}}
+                                                    <div class="w-full h-56 sm:h-64 md:h-72 lg:h-full bg-gradient-to-br from-purple-50 via-purple-25 to-purple-100 border border-purple-200 flex items-center justify-center p-6 relative overflow-hidden">
+                                                        {{-- Background Pattern --}}
+                                                        <div class="absolute inset-0 opacity-5">
+                                                            <div class="absolute top-6 left-6 w-6 h-6 border-2 border-purple-400 rounded-full"></div>
+                                                            <div class="absolute bottom-8 right-8 w-8 h-8 border-2 border-purple-400 rounded-lg rotate-12"></div>
+                                                            <div class="absolute top-20 right-12 w-4 h-4 bg-purple-400 rounded-full"></div>
+                                                            <div class="absolute bottom-20 left-12 w-5 h-5 border border-purple-400 rounded-full"></div>
+                                                        </div>
+                                                        
+                                                        {{-- Centered File Display --}}
+                                                        <div class="text-center">
+                                                            {{-- File Icon Container --}}
+                                                            <div class="relative mb-6">
+                                                                <div class="bg-white rounded-2xl shadow-xl p-6 border-2 border-purple-200 transform hover:scale-105 transition-transform duration-300">
+                                                                    <img src="{{ $featured->getFilePreviewUrl() }}" 
+                                                                         alt="File {{ strtoupper(pathinfo($featured->lampiran_file, PATHINFO_EXTENSION)) }}" 
+                                                                         class="w-20 h-24 object-contain mx-auto">
+                                                                </div>
+                                                                {{-- Floating download icon --}}
+                                                                <div class="absolute -bottom-2 -right-2 bg-purple-600 text-white rounded-full p-2 shadow-lg">
+                                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {{-- File Info Badge --}}
+                                                            <div class="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-5 py-3 shadow-lg border border-purple-200">
+                                                                <svg class="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                                </svg>
+                                                                <span class="text-purple-700 font-bold text-base">
+                                                                    {{ strtoupper(pathinfo($featured->lampiran_file, PATHINFO_EXTENSION)) }} File
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="w-full h-56 sm:h-64 md:h-72 lg:h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                                                        <svg class="w-20 h-20 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V8h2v9zm4 0h-2v-4h2v4z"/>
+                                                        </svg>
+                                                    </div>
+                                                @endif
+                                            </a>
+                                            
+                                            {{-- Badge Kategori --}}
+                                            <div class="absolute top-4 left-4">
+                                                @if($featured->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
+                                                        Pengumuman
+                                                    </span>
+                                                @elseif($featured->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                                        Berita Utama
+                                                    </span>
+                                                @else
+                                                    <span class="px-3 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
+                                                        Berita Harian
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="p-6 md:p-8 lg:w-1/2 flex flex-col justify-between">
                                         <div>
@@ -172,7 +238,7 @@
                                                     {{ Str::limit($featured->title, 100) }}
                                                 </a>
                                             </h3>
-                                            <p class="text-gray-600 line-clamp-3 mb-4 md:mb-6 text-sm md:text-base">{{ Str::limit(strip_tags($featured->content), 220) }}</p>
+                                            <p class="text-gray-600 line-clamp-3 mb-4 md:mb-6 text-sm md:text-base">{{ Str::limit(html_entity_decode(strip_tags($featured->content)), 220) }}</p>
                                         </div>
                                         <div class="flex items-center justify-between">
                                             <div class="flex items-center gap-3">
@@ -200,12 +266,77 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                 @foreach($others as $berita)
                                     <article class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
-                                        <a href="{{ route('public.berita.show', $berita) }}" class="block group">
-                                            <img src="{{ $berita->thumbnail ? asset('storage/' . $berita->thumbnail) : 'https://placehold.co/600x400/e2e8f0/adb5bd?text=Berita' }}" 
-                                                 alt="{{ $berita->title }}" 
-                                                 class="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300" 
-                                                 loading="lazy">
-                                        </a>
+                                        <div class="relative">
+                                            <a href="{{ route('public.berita.show', $berita) }}" class="block group">
+                                                @if($berita->thumbnail)
+                                                    <img src="{{ asset('storage/' . $berita->thumbnail) }}" 
+                                                         alt="{{ $berita->title }}" 
+                                                         class="w-full h-40 sm:h-48 object-cover group-hover:scale-105 transition-transform duration-300" 
+                                                         loading="lazy">
+                                                @elseif($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $berita->lampiran_file && !$berita->thumbnail)
+                                                    {{-- Preview file untuk pengumuman tanpa thumbnail --}}
+                                                    <div class="w-full h-40 sm:h-48 bg-gradient-to-br from-purple-50 via-purple-25 to-purple-100 border border-purple-200 flex items-center justify-center p-4 relative overflow-hidden">
+                                                        {{-- Background Pattern --}}
+                                                        <div class="absolute inset-0 opacity-5">
+                                                            <div class="absolute top-2 left-2 w-3 h-3 border border-purple-400 rounded-full"></div>
+                                                            <div class="absolute bottom-2 right-2 w-4 h-4 border border-purple-400 rounded-lg rotate-12"></div>
+                                                            <div class="absolute top-1/2 right-4 w-2 h-2 bg-purple-400 rounded-full"></div>
+                                                        </div>
+                                                        
+                                                        {{-- Centered File Display --}}
+                                                        <div class="text-center">
+                                                            {{-- File Icon Container --}}
+                                                            <div class="relative mb-3">
+                                                                <div class="bg-white rounded-xl shadow-lg p-3 border border-purple-200 transform hover:scale-105 transition-transform duration-300">
+                                                                    <img src="{{ $berita->getFilePreviewUrl() }}" 
+                                                                         alt="File {{ strtoupper(pathinfo($berita->lampiran_file, PATHINFO_EXTENSION)) }}" 
+                                                                         class="w-10 h-12 object-contain mx-auto">
+                                                                </div>
+                                                                {{-- Floating download icon --}}
+                                                                <div class="absolute -bottom-1 -right-1 bg-purple-600 text-white rounded-full p-1 shadow-md">
+                                                                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                                        <path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/>
+                                                                    </svg>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {{-- File Info Badge --}}
+                                                            <div class="inline-flex items-center gap-1 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 shadow-md border border-purple-200">
+                                                                <svg class="w-3 h-3 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                                </svg>
+                                                                <span class="text-purple-700 font-semibold text-xs">
+                                                                    {{ strtoupper(pathinfo($berita->lampiran_file, PATHINFO_EXTENSION)) }}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @else
+                                                    <div class="w-full h-40 sm:h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                                                        <svg class="w-16 h-16 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
+                                                            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V8h2v9zm4 0h-2v-4h2v4z"/>
+                                                        </svg>
+                                                    </div>
+                                                @endif
+                                            </a>
+                                            
+                                            {{-- Badge Kategori --}}
+                                            <div class="absolute top-3 left-3">
+                                                @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
+                                                        Pengumuman
+                                                    </span>
+                                                @elseif($berita->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                                        Berita Utama
+                                                    </span>
+                                                @else
+                                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
+                                                        Berita Harian
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </div>
                                         <div class="p-4 md:p-6 flex-1 flex flex-col">
                                             <div class="flex items-center text-xs text-gray-500 mb-3">
                                                 <span>{{ $berita->created_at->format('d F Y') }}</span>
@@ -217,7 +348,7 @@
                                                     {{ Str::limit($berita->title, 90) }}
                                                 </a>
                                             </h3>
-                                            <p class="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">{{ Str::limit(strip_tags($berita->content), 140) }}</p>
+                                            <p class="text-gray-600 text-sm line-clamp-3 mb-4 flex-1">{{ Str::limit(html_entity_decode(strip_tags($berita->content)), 140) }}</p>
                                             <a href="{{ route('public.berita.show', $berita) }}" class="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-semibold text-sm">
                                                 Baca selengkapnya
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">

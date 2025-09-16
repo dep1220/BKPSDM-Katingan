@@ -25,6 +25,7 @@ Route::post('/login', [AuthController::class, 'login']);
 // Berita
 Route::get('/beritas', [BeritaApiController::class, 'index']);
 Route::get('/beritas/{berita}', [BeritaApiController::class, 'show']);
+Route::get('/beritas/{berita}/download', [BeritaApiController::class, 'downloadAttachment'])->name('api.beritas.download');
 
 // Galeri
 Route::get('/galeris', [GaleriApiController::class, 'index']); 

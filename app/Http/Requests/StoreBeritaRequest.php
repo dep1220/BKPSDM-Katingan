@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule; 
 use App\Enums\BeritaStatus;
+use App\Enums\BeritaKategori;
 
 class StoreBeritaRequest extends FormRequest
 {
@@ -26,17 +27,33 @@ class StoreBeritaRequest extends FormRequest
         $rules = [
             'title' => 'required|string|max:255',
             'content' => 'required|string',
+            'kategori' => ['required', Rule::enum(BeritaKategori::class)],
+            'status' => ['required', Rule::enum(BeritaStatus::class)],
         ];
 
-        // Untuk create (POST), thumbnail wajib
+        // Untuk create (POST), thumbnail wajib kecuali kategori pengumuman
         if ($this->isMethod('POST')) {
-            $rules['thumbnail'] = 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240';
+            if ($this->input('kategori') === BeritaKategori::PENGUMUMAN->value) {
+                $rules['thumbnail'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+            } else {
+                $rules['thumbnail'] = 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
+            }
+            
+            // Validasi file lampiran untuk kategori pengumuman
+            if ($this->input('kategori') === BeritaKategori::PENGUMUMAN->value) {
+                $rules['lampiran_file'] = 'nullable|file|mimes:pdf,doc,docx|max:5120'; // Max 5MB
+            }
         }
         
         // Untuk update (PUT/PATCH), thumbnail opsional
         if ($this->isMethod('PUT') || $this->isMethod('PATCH')) {
-            $rules['thumbnail'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240';
+            $rules['thumbnail'] = 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048';
             $rules['status'] = ['required', Rule::enum(BeritaStatus::class)];
+            
+            // Validasi file lampiran untuk kategori pengumuman
+            if ($this->input('kategori') === BeritaKategori::PENGUMUMAN->value) {
+                $rules['lampiran_file'] = 'nullable|file|mimes:pdf,doc,docx|max:5120'; // Max 5MB
+            }
         }
 
         return $rules;

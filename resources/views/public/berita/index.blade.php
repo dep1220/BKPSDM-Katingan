@@ -113,6 +113,18 @@
                                     <img src="{{ asset('storage/' . $berita->thumbnail) }}" 
                                          alt="{{ $berita->title }}" 
                                          class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                @elseif($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $berita->lampiran_file)
+                                    {{-- Preview file untuk pengumuman tanpa thumbnail --}}
+                                    <div class="w-full h-48 bg-gradient-to-br from-purple-50 to-purple-100 flex flex-col items-center justify-center relative">
+                                        <img src="{{ $berita->getFilePreviewUrl() }}" 
+                                             alt="Preview {{ $berita->getFileExtension() }} file" 
+                                             class="w-24 h-32 object-contain">
+                                        <div class="absolute bottom-2 left-2 right-2">
+                                            <p class="text-xs text-purple-600 text-center font-medium">
+                                                File {{ strtoupper($berita->getFileExtension()) }} - Klik untuk unduh
+                                            </p>
+                                        </div>
+                                    </div>
                                 @else
                                     <div class="w-full h-48 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                                         <svg class="w-16 h-16 text-blue-300" fill="currentColor" viewBox="0 0 24 24">
@@ -121,22 +133,45 @@
                                     </div>
                                 @endif
 
-                                {{-- Badge Status & Kategori --}}
+                                {{-- Badge Kategori --}}
                                 <div class="absolute top-4 left-4 flex gap-2">
-                                    @if($berita->status === 'published')
-                                        <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                                            Published
+                                    @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN)
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
+                                            Pengumuman
+                                        </span>
+                                    @elseif($berita->kategori === \App\Enums\BeritaKategori::BERITA_UTAMA)
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
+                                            Berita Utama
+                                        </span>
+                                    @else
+                                        <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
+                                            Berita Harian
                                         </span>
                                     @endif
                                 </div>
 
-                                {{-- Overlay dengan tombol baca --}}
+                                {{-- Overlay dengan tombol baca/unduh --}}
                                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-300 flex items-center justify-center">
-                                    <a href="{{ route('public.berita.show', $berita->id) }}">
-                                        <span class="text-white font-semibold px-6 py-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
-                                            Baca Artikel
-                                        </span>
-                                    </a>
+                                    @if($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $berita->lampiran_file && !$berita->thumbnail)
+                                        {{-- Tombol download untuk pengumuman dengan file --}}
+                                        <div class="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+                                            <a href="{{ route('public.berita.show', $berita->id) }}" 
+                                               class="text-white font-semibold px-4 py-2 bg-blue-600 rounded-full text-center text-sm">
+                                                Baca Detail
+                                            </a>
+                                            <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                                               target="_blank"
+                                               class="text-white font-semibold px-4 py-2 bg-purple-600 rounded-full text-center text-sm">
+                                                {{ $berita->getFileIcon() }} Unduh File
+                                            </a>
+                                        </div>
+                                    @else
+                                        <a href="{{ route('public.berita.show', $berita->id) }}">
+                                            <span class="text-white font-semibold px-6 py-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transform scale-75 group-hover:scale-100 transition-all duration-300">
+                                                Baca Artikel
+                                            </span>
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
 
@@ -163,7 +198,7 @@
 
                                 {{-- Konten Preview --}}
                                 <p class="text-gray-600 leading-relaxed mb-4 line-clamp-3">
-                                    {{ Str::limit(strip_tags($berita->content), 120) }}
+                                    {{ Str::limit(html_entity_decode(strip_tags($berita->content)), 120) }}
                                 </p>
 
                                 {{-- Action Buttons --}}
