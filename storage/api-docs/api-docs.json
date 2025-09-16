@@ -1752,113 +1752,20 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Mendapatkan daftar semua visi dan misi",
-                "description": "Mengembalikan daftar semua visi dan misi yang tersedia dalam sistem",
+                "summary": "Menampilkan daftar visi dan misi",
                 "operationId": "getVisiMisiList",
-                "parameters": [
-                    {
-                        "name": "status",
-                        "in": "query",
-                        "description": "Filter berdasarkan status (active, inactive, all)",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": "all",
-                            "enum": [
-                                "active",
-                                "inactive",
-                                "all"
-                            ]
-                        }
-                    },
-                    {
-                        "name": "page",
-                        "in": "query",
-                        "description": "Nomor halaman untuk pagination",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 1,
-                            "minimum": 1
-                        }
-                    },
-                    {
-                        "name": "per_page",
-                        "in": "query",
-                        "description": "Jumlah item per halaman (maksimal 50)",
-                        "required": false,
-                        "schema": {
-                            "type": "integer",
-                            "default": 10,
-                            "maximum": 50,
-                            "minimum": 1
-                        }
-                    }
-                ],
                 "responses": {
                     "200": {
-                        "description": "Daftar visi dan misi berhasil diambil",
+                        "description": "Operasi berhasil",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Daftar visi dan misi berhasil diambil"
-                                        },
                                         "data": {
-                                            "properties": {
-                                                "data": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "$ref": "#/components/schemas/VisiMisi"
-                                                    }
-                                                },
-                                                "current_page": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                },
-                                                "per_page": {
-                                                    "type": "integer",
-                                                    "example": 10
-                                                },
-                                                "total": {
-                                                    "type": "integer",
-                                                    "example": 5
-                                                },
-                                                "last_page": {
-                                                    "type": "integer",
-                                                    "example": 1
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Parameter tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Parameter tidak valid"
-                                        },
-                                        "errors": {
-                                            "type": "object"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/VisiMisi"
+                                            }
                                         }
                                     },
                                     "type": "object"
@@ -1872,11 +1779,9 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Menyimpan visi dan misi baru",
-                "description": "Menyimpan data visi dan misi baru ke database dan mengaktifkannya",
+                "summary": "Membuat visi dan misi baru (memerlukan token)",
                 "operationId": "storeVisiMisi",
                 "requestBody": {
-                    "description": "Data visi dan misi yang akan disimpan",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -1887,18 +1792,13 @@
                                 ],
                                 "properties": {
                                     "visi": {
-                                        "description": "Teks visi organisasi (minimal 20 karakter)",
-                                        "type": "string",
-                                        "example": "Menjadi institusi terdepan dalam pengembangan sumber daya manusia yang profesional dan berintegritas"
+                                        "type": "string"
                                     },
                                     "misi": {
-                                        "description": "Array berisi misi organisasi (minimal 1 misi, setiap misi minimal 10 karakter)",
                                         "type": "array",
                                         "items": {
-                                            "type": "string",
-                                            "example": "Mengembangkan kompetensi aparatur sipil negara"
-                                        },
-                                        "minItems": 1
+                                            "type": "string"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -1908,91 +1808,22 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Visi dan misi berhasil disimpan",
+                        "description": "Visi dan misi berhasil dibuat",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan Misi berhasil ditambahkan dan diaktifkan"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Data tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Data tidak valid"
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "visi": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "Visi minimal 20 karakter."
-                                                    }
-                                                },
-                                                "misi": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "Minimal harus ada 1 misi."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Tidak terautentikasi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -2002,52 +1833,21 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Mendapatkan visi dan misi yang sedang aktif",
-                "description": "Mengembalikan data visi dan misi yang sedang aktif untuk ditampilkan di website publik",
+                "summary": "Menampilkan visi dan misi yang sedang aktif",
                 "operationId": "getActiveVisiMisi",
                 "responses": {
                     "200": {
-                        "description": "Visi dan misi aktif berhasil diambil",
+                        "description": "Operasi berhasil",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi aktif berhasil diambil"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Tidak ada visi dan misi yang aktif",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Tidak ada visi dan misi yang aktif"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Data tidak ditemukan"
                     }
                 }
             }
@@ -2057,64 +1857,31 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Mendapatkan detail visi dan misi berdasarkan ID",
-                "description": "Mengembalikan detail lengkap dari visi dan misi berdasarkan ID yang diberikan",
+                "summary": "Menampilkan detail satu visi dan misi",
                 "operationId": "getVisiMisiById",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID dari visi dan misi",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Detail visi dan misi berhasil diambil",
+                        "description": "Operasi berhasil",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Detail visi dan misi berhasil diambil"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Visi dan misi tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi tidak ditemukan"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Data tidak ditemukan"
                     }
                 }
             },
@@ -2122,23 +1889,19 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Memperbarui visi dan misi",
-                "description": "Memperbarui data visi dan misi yang sudah ada",
+                "summary": "Memperbarui visi dan misi yang ada (memerlukan token)",
                 "operationId": "updateVisiMisi",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID dari visi dan misi yang akan diperbarui",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "integer"
                         }
                     }
                 ],
                 "requestBody": {
-                    "description": "Data visi dan misi yang akan diperbarui",
                     "required": true,
                     "content": {
                         "application/json": {
@@ -2149,18 +1912,13 @@
                                 ],
                                 "properties": {
                                     "visi": {
-                                        "description": "Teks visi organisasi (minimal 20 karakter)",
-                                        "type": "string",
-                                        "example": "Menjadi institusi terdepan dalam pengembangan sumber daya manusia yang profesional dan berintegritas"
+                                        "type": "string"
                                     },
                                     "misi": {
-                                        "description": "Array berisi misi organisasi (minimal 1 misi, setiap misi minimal 10 karakter)",
                                         "type": "array",
                                         "items": {
-                                            "type": "string",
-                                            "example": "Mengembangkan kompetensi aparatur sipil negara"
-                                        },
-                                        "minItems": 1
+                                            "type": "string"
+                                        }
                                     }
                                 },
                                 "type": "object"
@@ -2174,107 +1932,18 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan Misi berhasil diperbarui"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "422": {
-                        "description": "Data tidak valid",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Data tidak valid"
-                                        },
-                                        "errors": {
-                                            "properties": {
-                                                "visi": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "Visi minimal 20 karakter."
-                                                    }
-                                                },
-                                                "misi": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "string",
-                                                        "example": "Minimal harus ada 1 misi."
-                                                    }
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Visi dan misi tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi tidak ditemukan"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Tidak terautentikasi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             },
@@ -2282,86 +1951,29 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Menghapus visi dan misi",
-                "description": "Menghapus data visi dan misi dari database",
+                "summary": "Menghapus visi dan misi (memerlukan token)",
                 "operationId": "deleteVisiMisi",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID dari visi dan misi yang akan dihapus",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "integer"
                         }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Visi dan misi berhasil dihapus",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan Misi berhasil dihapus"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Visi dan misi tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi tidak ditemukan"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                    "204": {
+                        "description": "Visi dan misi berhasil dihapus"
                     },
                     "401": {
-                        "description": "Tidak terautentikasi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -2371,18 +1983,15 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Mengaktifkan visi dan misi",
-                "description": "Mengaktifkan visi dan misi tertentu dan menonaktifkan yang lain",
+                "summary": "Mengaktifkan visi dan misi (memerlukan token)",
                 "operationId": "activateVisiMisi",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID dari visi dan misi yang akan diaktifkan",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "integer"
                         }
                     }
                 ],
@@ -2392,68 +2001,18 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan Misi berhasil diaktifkan"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Visi dan misi tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi tidak ditemukan"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Tidak terautentikasi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -2463,18 +2022,15 @@
                 "tags": [
                     "Visi & Misi"
                 ],
-                "summary": "Menonaktifkan visi dan misi",
-                "description": "Menonaktifkan visi dan misi tertentu",
+                "summary": "Menonaktifkan visi dan misi (memerlukan token)",
                 "operationId": "deactivateVisiMisi",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "ID dari visi dan misi yang akan dinonaktifkan",
                         "required": true,
                         "schema": {
-                            "type": "integer",
-                            "example": 1
+                            "type": "integer"
                         }
                     }
                 ],
@@ -2484,68 +2040,18 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": true
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan Misi berhasil dinonaktifkan"
-                                        },
-                                        "data": {
-                                            "$ref": "#/components/schemas/VisiMisi"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Visi dan misi tidak ditemukan",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Visi dan misi tidak ditemukan"
-                                        }
-                                    },
-                                    "type": "object"
+                                    "$ref": "#/components/schemas/VisiMisi"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Tidak terautentikasi",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": false
-                                        },
-                                        "message": {
-                                            "type": "string",
-                                            "example": "Unauthenticated"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Unauthenticated"
                     }
                 },
                 "security": [
                     {
-                        "sanctum": []
+                        "bearerAuth": []
                     }
                 ]
             }
@@ -2932,10 +2438,6 @@
     },
     "tags": [
         {
-            "name": "Visi & Misi",
-            "description": "API untuk mengelola data visi dan misi organisasi"
-        },
-        {
             "name": "Autentikasi",
             "description": "Endpoint untuk login, logout, dan manajemen profil pengguna"
         },
@@ -2966,6 +2468,10 @@
         {
             "name": "Agenda",
             "description": "Agenda"
+        },
+        {
+            "name": "Visi & Misi",
+            "description": "Visi & Misi"
         }
     ]
 }

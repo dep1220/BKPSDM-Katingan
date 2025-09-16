@@ -49,8 +49,7 @@ Route::get('/heroes/{hero}', [HeroApiController::class, 'show']);
 // Visi & Misi
 Route::get('/visi-misi', [VisiMisiApiController::class, 'index']);
 Route::get('/visi-misi/active', [VisiMisiApiController::class, 'active']);
-Route::get('/visi-misi/{id}', [VisiMisiApiController::class, 'show']);
-Route::get('/visi-misi/statistics', [VisiMisiApiController::class, 'statistics']);
+Route::get('/visi-misi/{visiMisi}', [VisiMisiApiController::class, 'show']);
 
 // Kontak (publik untuk mengirim pesan)
 Route::post('/kontaks', [KontakApiController::class, 'store']);
@@ -92,6 +91,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/heroes/{hero}', [HeroApiController::class, 'update']);
     Route::post('/heroes/{hero}/image', [HeroApiController::class, 'updateImage']);
     Route::delete('/heroes/{hero}', [HeroApiController::class, 'destroy']);
+
+    // Visi & Misi Management
+    Route::post('/visi-misi', [VisiMisiApiController::class, 'store']);
+    Route::put('/visi-misi/{visiMisi}', [VisiMisiApiController::class, 'update']);
+    Route::delete('/visi-misi/{visiMisi}', [VisiMisiApiController::class, 'destroy']);
+    Route::post('/visi-misi/{visiMisi}/activate', [VisiMisiApiController::class, 'activate']);
+    Route::post('/visi-misi/{visiMisi}/deactivate', [VisiMisiApiController::class, 'deactivate']);
 
     // Kontak Management (admin only)
     Route::get('/kontaks', [KontakApiController::class, 'index']);
