@@ -54,8 +54,8 @@
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                <span class="lg:hidden">Tambah Agenda Baru</span>
-                                <span class="hidden lg:inline">Tambah Agenda</span>
+                                <span class="xl:hidden">Tambah Agenda Baru</span>
+                                <span class="hidden xl:inline">Tambah Agenda</span>
                             </a>
                         </div>
                     </div>
@@ -143,10 +143,11 @@
                     @endif
                 </div>
 
-                <!-- Mobile Card View -->
-                <div class="block lg:hidden space-y-4">
-                    @forelse ($agenda as $item)
-                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <!-- Mobile/Tablet Card View -->
+                <div class="block xl:hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @forelse ($agenda as $item)
+                            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
                             <div class="flex items-start space-x-3">
                                 <div class="flex-shrink-0">
                                     <div class="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
@@ -219,9 +220,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    @empty
-                        <div class="text-center py-12">
+                            </div>
+                        @empty
+                        <div class="col-span-1 md:col-span-2 text-center py-12">
                             <svg class="w-12 h-12 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
@@ -245,11 +246,12 @@
                                 </a>
                             @endif
                         </div>
-                    @endforelse
+                        @endforelse
+                    </div>
                 </div>
 
                 <!-- Table View for Large Screens -->
-                <div class="hidden lg:block">
+                <div class="hidden xl:block">
                     <div class="overflow-x-auto">
                         <table class="min-w-full bg-white border border-gray-200 rounded-lg">
                             <thead class="bg-gray-50">
