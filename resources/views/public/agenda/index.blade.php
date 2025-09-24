@@ -159,13 +159,47 @@
                                 @endif
                                 
                                 <div class="p-4 md:p-5">
-                                    <!-- Tanggal -->
-                                    <div class="flex items-center text-blue-600 text-sm font-medium mb-2">
-                                        <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                        </svg>
-                                        {{ $item->tanggal ? \Carbon\Carbon::parse($item->tanggal)->format('d M Y') : \Carbon\Carbon::parse($item->created_at)->format('d M Y') }}
+                                    <!-- Tanggal dan Status -->
+                                    <div class="flex items-center justify-between mb-2">
+                                        <div class="flex items-center text-blue-600 text-sm font-medium">
+                                            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            @if($item->start_date)
+                                                {{ $item->start_date->format('d M Y') }}
+                                                @if($item->end_date && !$item->start_date->equalTo($item->end_date))
+                                                    - {{ $item->end_date->format('d M Y') }}
+                                                @endif
+                                            @else
+                                                {{ $item->created_at->format('d M Y') }}
+                                            @endif
+                                        </div>
+                                        
+                                        <!-- Status Badge -->
+                                        @if($item->status)
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $item->status->color() }}">
+                                                {{ $item->status->label() }}
+                                            </span>
+                                        @endif
                                     </div>
+                                    
+                                    <!-- Waktu -->
+                                    @if($item->start_time || $item->end_time)
+                                        <div class="flex items-center text-gray-600 text-sm mb-3">
+                                            <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                            @if($item->start_time)
+                                                {{ $item->start_time }}
+                                                @if($item->end_time)
+                                                    - {{ $item->end_time }}
+                                                @endif
+                                                WIB
+                                            @elseif($item->end_time)
+                                                Selesai: {{ $item->end_time }} WIB
+                                            @endif
+                                        </div>
+                                    @endif
                                     
                                     <!-- Judul -->
                                     <h3 class="text-lg md:text-xl font-bold text-slate-800 mb-3 line-clamp-2 hover:text-blue-600 transition-colors">

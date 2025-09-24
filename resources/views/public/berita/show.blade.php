@@ -7,108 +7,6 @@
     <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 @endsection
 
-@push('styles')
-<style>
-    /* Responsive image container */
-    .berita-image-container {
-        position: relative;
-        width: 100%;
-        background: #f3f4f6;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        min-height: 300px;
-    }
-    
-    .berita-image {
-        width: 100%;
-        height: auto;
-        max-height: 70vh;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-        transition: opacity 0.3s ease;
-    }
-    
-    /* Responsive heights */
-    @media (max-width: 640px) {
-        .berita-image-container {
-            min-height: 250px;
-        }
-        .berita-image {
-            max-height: 50vh;
-            aspect-ratio: 16/10;
-        }
-    }
-    
-    @media (min-width: 641px) and (max-width: 1024px) {
-        .berita-image-container {
-            min-height: 350px;
-        }
-        .berita-image {
-            max-height: 60vh;
-            aspect-ratio: 16/9;
-        }
-    }
-    
-    @media (min-width: 1025px) {
-        .berita-image-container {
-            min-height: 400px;
-        }
-        .berita-image {
-            max-height: 70vh;
-            aspect-ratio: 16/9;
-        }
-    }
-    
-    /* Loading placeholder */
-    .berita-image-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-        z-index: 0;
-    }
-    
-    .berita-image-container img {
-        position: relative;
-        z-index: 1;
-    }
-    
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    
-    /* Hide loading after image loads */
-    .berita-image-container.loaded::before {
-        display: none;
-    }
-    
-    /* Image quality optimization */
-    .berita-image {
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-    }
-    
-    /* Ensure aspect ratio is maintained on all screens */
-    .berita-image-container {
-        aspect-ratio: 16/9;
-    }
-    
-    @media (max-width: 640px) {
-        .berita-image-container {
-            aspect-ratio: 16/10;
-        }
-    }
-</style>
-@endpush
-
 @section('content')
     {{-- Content Protection Component --}}
     @include('components.content-protection')
@@ -167,20 +65,16 @@
                 {{-- Gambar Utama / Preview File --}}
                 <div class="mb-6 md:mb-8">
                     @if($berita->thumbnail)
-                        <div class="berita-image-container">
-                            <img src="{{ asset('storage/' . $berita->thumbnail) }}" 
-                                 alt="{{ $berita->title }}" 
-                                 class="berita-image protected-content" 
-                                 draggable="false"
-                                 loading="lazy"
-                                 onload="this.parentElement.classList.add('loaded')">
-                        </div>
+                        <img src="{{ asset('storage/' . $berita->thumbnail) }}"
+                             alt="{{ $berita->title }}"
+                             class="block mx-auto max-w-xl w-full rounded-lg shadow-lg protected-content"
+                             draggable="false">
                     @elseif($berita->kategori === \App\Enums\BeritaKategori::PENGUMUMAN && $berita->lampiran_file)
                         {{-- Preview file untuk pengumuman tanpa thumbnail --}}
                         <div class="w-full bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-lg p-8 border-2 border-purple-200">
                             <div class="flex flex-col items-center justify-center text-center">
-                                <img src="{{ $berita->getFilePreviewUrl() }}" 
-                                     alt="Preview {{ $berita->getFileExtension() }} file" 
+                                <img src="{{ $berita->getFilePreviewUrl() }}"
+                                     alt="Preview {{ $berita->getFileExtension() }} file"
                                      class="w-32 h-40 object-contain mb-4">
                                 <h3 class="text-lg font-semibold text-purple-800 mb-2">
                                     Dokumen {{ strtoupper($berita->getFileExtension()) }}
@@ -188,7 +82,7 @@
                                 <p class="text-purple-600 mb-4 text-sm">
                                     Klik tombol di bawah untuk mengunduh atau membuka dokumen
                                 </p>
-                                <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                                <a href="{{ asset('storage/' . $berita->lampiran_file) }}"
                                    target="_blank"
                                    class="inline-flex items-center px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 shadow-sm hover:shadow-md">
                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +102,7 @@
                             </div>
                         </div>
                     @endif
-                    
+
                     {{-- Badge Kategori --}}
                     <div class="mt-4 flex justify-start">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
@@ -250,7 +144,7 @@
                                     </p>
                                 </div>
                             </div>
-                            <a href="{{ asset('storage/' . $berita->lampiran_file) }}" 
+                            <a href="{{ asset('storage/' . $berita->lampiran_file) }}"
                                target="_blank"
                                class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition-all duration-300 text-sm">
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,7 +199,7 @@
         document.body.appendChild(textArea);
         textArea.select();
         textArea.setSelectionRange(0, 99999);
-        
+
         try {
             const successful = document.execCommand('copy');
             if (successful) {
@@ -316,7 +210,7 @@
         } catch (err) {
             showNotification('❌ Gagal menyalin link', 'error');
         }
-        
+
         document.body.removeChild(textArea);
     }
 
@@ -324,7 +218,7 @@
     function shareWhatsApp() {
         const text = `*${beritaTitle}*\n\n${beritaDescription}\n\nBaca selengkapnya: ${currentUrl}`;
         const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
-        
+
         window.open(waUrl, '_blank');
         showNotification('📱 Membuka WhatsApp...', 'info');
     }
@@ -332,7 +226,7 @@
     // Fungsi share Facebook
     function shareFacebook() {
         const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
-        
+
         window.open(fbUrl, '_blank', 'width=600,height=400');
         showNotification('📘 Membuka Facebook...', 'info');
     }
@@ -341,7 +235,7 @@
     function shareTwitter() {
         const text = `${beritaTitle} - ${beritaDescription}`;
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(currentUrl)}`;
-        
+
         window.open(twitterUrl, '_blank', 'width=600,height=400');
         showNotification('🐦 Membuka Twitter...', 'info');
     }
@@ -403,7 +297,7 @@
     // Test fungsi saat halaman dimuat
     document.addEventListener('DOMContentLoaded', function() {
         // Share buttons ready
-        
+
         // Test click event pada tombol pertama
         setTimeout(() => {
             // All share functions loaded successfully

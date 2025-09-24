@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Schedule untuk membersihkan aktivitas lama setiap hari jam 2 pagi
 Schedule::command('activities:cleanup')->dailyAt('02:00');
+
+// Schedule untuk update status agenda setiap 5 menit
+Schedule::command('agenda:update-status')->everyFiveMinutes();

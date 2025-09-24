@@ -64,6 +64,163 @@
                                     </p>
                                 </div>
 
+                                <!-- Tanggal dan Waktu -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tanggal Mulai <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="date" 
+                                               id="start_date" 
+                                               name="start_date" 
+                                               value="{{ old('start_date', $agenda->start_date?->format('Y-m-d')) }}"
+                                               class="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('start_date') ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' }}" 
+                                               required>
+                                        @error('start_date')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Tanggal Selesai
+                                        </label>
+                                        <input type="date" 
+                                               id="end_date" 
+                                               name="end_date" 
+                                               value="{{ old('end_date', $agenda->end_date?->format('Y-m-d')) }}"
+                                               class="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('end_date') ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' }}">
+                                        @error('end_date')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-sm text-gray-500">Kosongkan jika agenda hanya satu hari</p>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label for="start_time" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Jam Mulai <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="time" 
+                                               id="start_time" 
+                                               name="start_time" 
+                                               value="{{ old('start_time', $agenda->start_time) }}"
+                                               class="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('start_time') ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' }}" 
+                                               required>
+                                        @error('start_time')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    
+                                    <div>
+                                        <label for="end_time" class="block text-sm font-medium text-gray-700 mb-2">
+                                            Jam Selesai
+                                        </label>
+                                        <input type="time" 
+                                               id="end_time" 
+                                               name="end_time" 
+                                               value="{{ old('end_time', $agenda->end_time) }}"
+                                               class="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('end_time') ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' }}">
+                                        @error('end_time')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                        <p class="mt-1 text-sm text-gray-500">Kosongkan jika waktu tidak terbatas</p>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6">
+                                    <label for="status" class="block text-sm font-medium text-gray-700 mb-2">
+                                        Status Agenda <span class="text-red-500">*</span>
+                                    </label>
+                                    
+                                    <!-- Peringatan Status Otomatis -->
+                                    <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                                        <div class="flex">
+                                            <svg class="w-5 h-5 text-yellow-400 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.962-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                            </svg>
+                                            <div class="text-sm">
+                                                <p class="font-medium text-yellow-800">Informasi Status Otomatis</p>
+                                                <p class="text-yellow-700 mt-1">
+                                                    Status agenda akan diperbarui otomatis berdasarkan waktu: <br>
+                                                    <span class="font-medium">• Akan Datang:</span> Jika waktu mulai belum tiba <br>
+                                                    <span class="font-medium">• Sedang Berlangsung:</span> Jika agenda sedang berlangsung <br>
+                                                    <span class="font-medium">• Selesai:</span> Jika agenda sudah berakhir <br>
+                                                    Status manual hanya untuk <span class="font-medium text-red-600">pembatalan</span> agenda.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <select id="status" 
+                                            name="status" 
+                                            class="block w-full rounded-md shadow-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 {{ $errors->has('status') ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : '' }}" 
+                                            required>
+                                        <option value="">Pilih Status</option>
+                                        
+                                        <!-- Status Otomatis (readonly jika sudah ada tanggal/waktu) -->
+                                        @if($agenda->start_date && $agenda->start_time)
+                                            @php
+                                                $now = now();
+                                                $startDateTime = $agenda->start_date->copy()->setTimeFromTimeString($agenda->start_time);
+                                                $endDateTime = null;
+                                                
+                                                if ($agenda->end_date && $agenda->end_time) {
+                                                    $endDateTime = $agenda->end_date->copy()->setTimeFromTimeString($agenda->end_time);
+                                                } elseif ($agenda->end_time) {
+                                                    $endDateTime = $agenda->start_date->copy()->setTimeFromTimeString($agenda->end_time);
+                                                } else {
+                                                    $endDateTime = $startDateTime->copy()->addHours(2);
+                                                }
+                                                
+                                                $autoStatus = null;
+                                                if ($now->lt($startDateTime)) {
+                                                    $autoStatus = \App\Enums\AgendaStatus::UPCOMING;
+                                                } elseif ($now->between($startDateTime, $endDateTime)) {
+                                                    $autoStatus = \App\Enums\AgendaStatus::ONGOING;
+                                                } else {
+                                                    $autoStatus = \App\Enums\AgendaStatus::COMPLETED;
+                                                }
+                                            @endphp
+                                            
+                                            <!-- Status otomatis berdasarkan waktu -->
+                                            <option value="{{ $autoStatus->value }}" 
+                                                    {{ old('status', $agenda->status?->value) === $autoStatus->value ? 'selected' : '' }}
+                                                    class="bg-blue-50 text-blue-800">
+                                                {{ $autoStatus->label() }} (Otomatis)
+                                            </option>
+                                        @else
+                                            <!-- Jika belum ada tanggal/waktu, tampilkan semua status kecuali cancelled -->
+                                            @foreach(\App\Enums\AgendaStatus::cases() as $status)
+                                                @if($status !== \App\Enums\AgendaStatus::CANCELLED)
+                                                    <option value="{{ $status->value }}" 
+                                                            {{ old('status', $agenda->status?->value) === $status->value ? 'selected' : '' }}>
+                                                        {{ $status->label() }}
+                                                    </option>
+                                                @endif
+                                            @endforeach
+                                        @endif
+                                        
+                                        <!-- Opsi pembatalan selalu tersedia -->
+                                        <option value="{{ \App\Enums\AgendaStatus::CANCELLED->value }}" 
+                                                {{ old('status', $agenda->status?->value) === \App\Enums\AgendaStatus::CANCELLED->value ? 'selected' : '' }}
+                                                class="bg-red-50 text-red-800">
+                                            {{ \App\Enums\AgendaStatus::CANCELLED->label() }} (Manual)
+                                        </option>
+                                    </select>
+                                    @error('status')
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    <p class="mt-1 text-sm text-gray-500">
+                                        @if($agenda->start_date && $agenda->start_time)
+                                            Status akan diperbarui otomatis berdasarkan waktu agenda. Hanya status "Dibatalkan" yang dapat dipilih secara manual.
+                                        @else
+                                            Setelah menentukan tanggal dan waktu, status akan diperbarui otomatis.
+                                        @endif
+                                    </p>
+                                </div>
+
                                 <!-- Current File Info -->
                                 @if($agenda->file_path)
                                     <div class="mb-6">
@@ -236,6 +393,47 @@
                                         </span>
                                     </span>
                                 </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium text-gray-600">Tanggal:</span>
+                                    <span class="text-gray-900 text-sm">
+                                        @if($agenda->start_date)
+                                            {{ $agenda->start_date->format('d/m/Y') }}
+                                            @if($agenda->end_date && $agenda->end_date != $agenda->start_date)
+                                                - {{ $agenda->end_date->format('d/m/Y') }}
+                                            @endif
+                                        @else
+                                            <span class="text-gray-500">Belum diset</span>
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium text-gray-600">Waktu:</span>
+                                    <span class="text-gray-900 text-sm">
+                                        @if($agenda->start_time)
+                                            {{ $agenda->start_time }}
+                                            @if($agenda->end_time)
+                                                - {{ $agenda->end_time }}
+                                            @endif
+                                            WIB
+                                        @else
+                                            <span class="text-gray-500">Belum diset</span>
+                                        @endif
+                                    </span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="font-medium text-gray-600">Status:</span>
+                                    <span>
+                                        @if($agenda->status)
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $agenda->status->color() }}">
+                                                {{ $agenda->status->label() }}
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                Belum diset
+                                            </span>
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -256,7 +454,52 @@
                                 <p class="text-sm text-gray-700 mt-2" id="preview-description">
                                     {{ $agenda->description ?: 'Tidak ada deskripsi' }}
                                 </p>
-                                <div id="preview-file" class="text-sm text-gray-600 mt-2 flex items-center">
+                                
+                                <div class="mt-3 space-y-2">
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <span id="preview-date-text">
+                                            @if($agenda->start_date)
+                                                {{ $agenda->start_date->format('d F Y') }}
+                                                @if($agenda->end_date && $agenda->end_date != $agenda->start_date)
+                                                    - {{ $agenda->end_date->format('d F Y') }}
+                                                @endif
+                                            @else
+                                                Belum ada tanggal dipilih
+                                            @endif
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm text-gray-700">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span id="preview-time-text">
+                                            @if($agenda->start_time)
+                                                {{ $agenda->start_time }}
+                                                @if($agenda->end_time)
+                                                    - {{ $agenda->end_time }}
+                                                @endif
+                                                WIB
+                                            @else
+                                                Belum ada waktu dipilih
+                                            @endif
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="flex items-center text-sm">
+                                        <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span id="preview-status-text" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $agenda->status ? $agenda->status->color() : 'bg-gray-100 text-gray-800' }}">
+                                            {{ $agenda->status ? $agenda->status->label() : 'Belum ada status dipilih' }}
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div id="preview-file" class="text-sm text-gray-600 mt-3 flex items-center">
                                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
@@ -280,10 +523,33 @@
             const titleInput = document.getElementById('title');
             const descriptionInput = document.getElementById('description');
             const fileInput = document.getElementById('file');
+            const startDateInput = document.getElementById('start_date');
+            const endDateInput = document.getElementById('end_date');
+            const startTimeInput = document.getElementById('start_time');
+            const endTimeInput = document.getElementById('end_time');
+            const statusInput = document.getElementById('status');
             
             const previewTitle = document.getElementById('preview-title');
             const previewDescription = document.getElementById('preview-description');
             const previewFile = document.getElementById('preview-file');
+            const previewDateText = document.getElementById('preview-date-text');
+            const previewTimeText = document.getElementById('preview-time-text');
+            const previewStatusText = document.getElementById('preview-status-text');
+
+            // Status color mapping
+            const statusColors = {
+                'upcoming': 'bg-blue-100 text-blue-800',
+                'ongoing': 'bg-green-100 text-green-800',
+                'completed': 'bg-gray-100 text-gray-800',
+                'cancelled': 'bg-red-100 text-red-800'
+            };
+
+            const statusLabels = {
+                'upcoming': 'Akan Datang',
+                'ongoing': 'Sedang Berlangsung',
+                'completed': 'Selesai',
+                'cancelled': 'Dibatalkan'
+            };
 
             // Title preview
             titleInput.addEventListener('input', function() {
@@ -302,6 +568,74 @@
                     previewDescription.textContent = '{{ $agenda->description ?: "Tidak ada deskripsi" }}';
                 }
             });
+
+            // Date preview
+            function updateDatePreview() {
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                
+                if (startDate) {
+                    let dateText = formatDate(startDate);
+                    if (endDate && endDate !== startDate) {
+                        dateText += ' - ' + formatDate(endDate);
+                    }
+                    previewDateText.textContent = dateText;
+                    previewDateText.parentElement.classList.remove('text-gray-500');
+                    previewDateText.parentElement.classList.add('text-gray-700');
+                } else {
+                    previewDateText.textContent = 'Belum ada tanggal dipilih';
+                    previewDateText.parentElement.classList.remove('text-gray-700');
+                    previewDateText.parentElement.classList.add('text-gray-500');
+                }
+            }
+
+            // Time preview
+            function updateTimePreview() {
+                const startTime = startTimeInput.value;
+                const endTime = endTimeInput.value;
+                
+                if (startTime || endTime) {
+                    let timeText = '';
+                    if (startTime) {
+                        timeText = startTime;
+                        if (endTime) {
+                            timeText += ' - ' + endTime;
+                        }
+                        timeText += ' WIB';
+                    } else if (endTime) {
+                        timeText = 'Selesai: ' + endTime + ' WIB';
+                    }
+                    previewTimeText.textContent = timeText;
+                    previewTimeText.parentElement.classList.remove('text-gray-500');
+                    previewTimeText.parentElement.classList.add('text-gray-700');
+                } else {
+                    previewTimeText.textContent = 'Belum ada waktu dipilih';
+                    previewTimeText.parentElement.classList.remove('text-gray-700');
+                    previewTimeText.parentElement.classList.add('text-gray-500');
+                }
+            }
+
+            // Status preview
+            statusInput.addEventListener('change', function() {
+                if (this.value) {
+                    const label = statusLabels[this.value] || this.value;
+                    const colorClass = statusColors[this.value] || 'bg-gray-100 text-gray-800';
+                    
+                    previewStatusText.textContent = label;
+                    previewStatusText.className = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`;
+                } else {
+                    previewStatusText.textContent = 'Belum ada status dipilih';
+                    previewStatusText.className = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800';
+                }
+            });
+
+            // Date change listeners
+            startDateInput.addEventListener('change', updateDatePreview);
+            endDateInput.addEventListener('change', updateDatePreview);
+
+            // Time change listeners
+            startTimeInput.addEventListener('change', updateTimePreview);
+            endTimeInput.addEventListener('change', updateTimePreview);
 
             // File preview
             fileInput.addEventListener('change', function() {
@@ -358,6 +692,47 @@
                     }
                 }
             });
+
+            // Date validation
+            endDateInput.addEventListener('change', function() {
+                const startDate = startDateInput.value;
+                const endDate = this.value;
+                
+                if (startDate && endDate && endDate < startDate) {
+                    alert('Tanggal selesai tidak boleh lebih awal dari tanggal mulai!');
+                    this.value = '';
+                    updateDatePreview();
+                }
+            });
+
+            // Time validation
+            endTimeInput.addEventListener('change', function() {
+                const startDate = startDateInput.value;
+                const endDate = endDateInput.value;
+                const startTime = startTimeInput.value;
+                const endTime = this.value;
+                
+                // Only validate time if it's the same day
+                if (startTime && endTime && (!endDate || endDate === startDate)) {
+                    if (endTime <= startTime) {
+                        alert('Jam selesai harus lebih besar dari jam mulai!');
+                        this.value = '';
+                        updateTimePreview();
+                    }
+                }
+            });
+
+            // Helper function to format date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                const options = { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    timeZone: 'Asia/Jakarta'
+                };
+                return date.toLocaleDateString('id-ID', options);
+            }
         });
     </script>
 </x-app-layout>

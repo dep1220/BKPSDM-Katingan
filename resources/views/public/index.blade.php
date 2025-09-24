@@ -46,20 +46,131 @@
                 @endforelse
             </div>
             <div class="swiper-pagination" aria-label="Navigasi slide"></div>
-            <div class="swiper-button-next" aria-label="Slide berikut"></div>
-            <div class="swiper-button-prev" aria-label="Slide sebelumnya"></div>
+            
+            <!-- Custom Navigation Buttons -->
+            <button id="prevHero" class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            
+            <button id="nextHero" class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
         </div>
+        
+        <style>
+            /* Custom Hero Navigation Styles */
+            #prevHero, #nextHero {
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-50%) scale(0.8);
+                transition: all 0.3s ease;
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            }
+            
+            /* Mobile-first responsive sizes */
+            @media (max-width: 640px) {
+                #prevHero, #nextHero {
+                    padding: 0.5rem;
+                    width: 2.25rem;
+                    height: 2.25rem;
+                    background-color: transparent;
+                    backdrop-filter: none;
+                    border: 2px solid rgba(255, 255, 255, 0.6);
+                    box-shadow: none;
+                }
+                
+                #prevHero {
+                    left: 0.75rem !important;
+                }
+                
+                #nextHero {
+                    right: 0.75rem !important;
+                }
+                
+                #prevHero svg, #nextHero svg {
+                    width: 1rem;
+                    height: 1rem;
+                    stroke-width: 3;
+                }
+                
+                #prevHero:hover, #nextHero:hover {
+                    background-color: transparent;
+                    transform: translateY(-50%) scale(1.05);
+                    border-color: rgba(255, 255, 255, 0.9);
+                    box-shadow: none;
+                }
+            }
+            
+            @media (min-width: 641px) and (max-width: 768px) {
+                #prevHero, #nextHero {
+                    padding: 0.75rem;
+                    width: 2.75rem;
+                    height: 2.75rem;
+                }
+                
+                #prevHero svg, #nextHero svg {
+                    width: 1.125rem;
+                    height: 1.125rem;
+                }
+            }
+            
+            @media (min-width: 769px) {
+                #prevHero, #nextHero {
+                    padding: 0.75rem;
+                    width: 2.5rem;
+                    height: 2.5rem;
+                }
+                
+                #prevHero svg, #nextHero svg {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                }
+            }
+            
+            /* Enhanced hover effects untuk desktop */
+            @media (min-width: 641px) {
+                #prevHero:hover, #nextHero:hover {
+                    background-color: rgba(172, 172, 172, 0.37);
+                    transform: translateY(-50%) scale(1.05);
+                    border-color: rgba(255, 255, 255, 0.4);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+                }
+            }
+            
+            /* Active state untuk semua device */
+            #prevHero:active, #nextHero:active {
+                transform: translateY(-50%) scale(0.95);
+            }
+            
+            /* Visible state untuk mobile - lebih terlihat */
+            @media (max-width: 640px) {
+                .swiper-container:hover #prevHero,
+                .swiper-container:hover #nextHero,
+                #prevHero.show-mobile,
+                #nextHero.show-mobile {
+                    opacity: 0.9 !important;
+                    visibility: visible !important;
+                    transform: translateY(-50%) scale(1) !important;
+                }
+            }
+        </style>
+        
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 // Hitung jumlah slide yang tersedia
                 const slides = document.querySelectorAll('.swiper-slide');
                 const slideCount = slides.length;
                 
-                // Konfigurasi dasar Swiper
+                // Konfigurasi dasar Swiper tanpa navigasi built-in
                 const swiperConfig = {
                     autoplay: { delay: 5000, disableOnInteraction: false },
                     pagination: { el: '.swiper-pagination', clickable: true },
-                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
                     effect: 'fade',
                     fadeEffect: { crossFade: true },
                     keyboard: { enabled: true },
@@ -77,29 +188,59 @@
                 // Inisialisasi Swiper
                 const heroSwiper = new Swiper('.swiper-container', swiperConfig);
                 
-                // Auto-hide navigation enhancement
+                // Custom navigation buttons
                 const swiperContainer = document.querySelector('.swiper-container');
-                const nextBtn = document.querySelector('.swiper-button-next');
-                const prevBtn = document.querySelector('.swiper-button-prev');
+                const nextBtn = document.getElementById('nextHero');
+                const prevBtn = document.getElementById('prevHero');
+                const pagination = document.querySelector('.swiper-pagination');
                 let hideTimeout;
                 
+                // Custom navigation event handlers
+                if (nextBtn && slideCount > 1) {
+                    nextBtn.addEventListener('click', () => {
+                        heroSwiper.slideNext();
+                    });
+                }
+                
+                if (prevBtn && slideCount > 1) {
+                    prevBtn.addEventListener('click', () => {
+                        heroSwiper.slidePrev();
+                    });
+                }
+                
                 if (swiperContainer && slideCount > 1) {
+                    // Deteksi mobile device
+                    const isMobile = window.innerWidth <= 640;
+                    
                     // Function to show navigation
                     function showNavigation() {
-                        if (nextBtn) nextBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: scale(1) !important;';
-                        if (prevBtn) prevBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: scale(1) !important;';
+                        if (nextBtn) {
+                            nextBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: translateY(-50%) scale(1) !important;';
+                            if (isMobile) nextBtn.classList.add('show-mobile');
+                        }
+                        if (prevBtn) {
+                            prevBtn.style.cssText += 'opacity: 1 !important; visibility: visible !important; transform: translateY(-50%) scale(1) !important;';
+                            if (isMobile) prevBtn.classList.add('show-mobile');
+                        }
                         
                         // Clear existing timeout
                         clearTimeout(hideTimeout);
                         
-                        // Set timeout to hide navigation after 3 seconds of inactivity
-                        hideTimeout = setTimeout(hideNavigation, 3000);
+                        // Set timeout to hide navigation - lebih lama untuk mobile
+                        const hideDelay = isMobile ? 4000 : 3000;
+                        hideTimeout = setTimeout(hideNavigation, hideDelay);
                     }
                     
                     // Function to hide navigation
                     function hideNavigation() {
-                        if (nextBtn) nextBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: scale(0.8) !important;';
-                        if (prevBtn) prevBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: scale(0.8) !important;';
+                        if (nextBtn) {
+                            nextBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: translateY(-50%) scale(0.8) !important;';
+                            nextBtn.classList.remove('show-mobile');
+                        }
+                        if (prevBtn) {
+                            prevBtn.style.cssText += 'opacity: 0 !important; visibility: hidden !important; transform: translateY(-50%) scale(0.8) !important;';
+                            prevBtn.classList.remove('show-mobile');
+                        }
                     }
                     
                     // Show navigation on various interactions
@@ -109,19 +250,37 @@
                     swiperContainer.addEventListener('touchmove', showNavigation);
                     swiperContainer.addEventListener('focus', showNavigation, true);
                     
+                    // Mobile-specific: show on tap anywhere on slider
+                    if (isMobile) {
+                        swiperContainer.addEventListener('click', (e) => {
+                            // Jika bukan klik pada tombol navigasi, tampilkan navigasi
+                            if (!e.target.closest('#nextHero') && !e.target.closest('#prevHero')) {
+                                showNavigation();
+                            }
+                        });
+                    }
+                    
                     // Keep navigation visible while hovering over buttons
                     if (nextBtn) {
                         nextBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
                         nextBtn.addEventListener('mouseleave', () => {
-                            hideTimeout = setTimeout(hideNavigation, 1000);
+                            const hideDelay = isMobile ? 2000 : 1000;
+                            hideTimeout = setTimeout(hideNavigation, hideDelay);
                         });
+                        
+                        // Mobile touch events
+                        nextBtn.addEventListener('touchstart', () => clearTimeout(hideTimeout));
                     }
                     
                     if (prevBtn) {
                         prevBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
                         prevBtn.addEventListener('mouseleave', () => {
-                            hideTimeout = setTimeout(hideNavigation, 1000);
+                            const hideDelay = isMobile ? 2000 : 1000;
+                            hideTimeout = setTimeout(hideNavigation, hideDelay);
                         });
+                        
+                        // Mobile touch events  
+                        prevBtn.addEventListener('touchstart', () => clearTimeout(hideTimeout));
                     }
                     
                     // Show navigation briefly on slide change
@@ -129,14 +288,18 @@
                         showNavigation();
                     });
                     
-                    // Initial state - hide navigation after 2 seconds
-                    setTimeout(hideNavigation, 2000);
+                    // Initial state - show longer for mobile
+                    const initialShowDelay = isMobile ? 3000 : 2000;
+                    setTimeout(hideNavigation, initialShowDelay);
+                    
+                    // Show navigation on initial load untuk mobile
+                    if (isMobile) {
+                        setTimeout(showNavigation, 500);
+                    }
                 }
                 
                 // Sembunyikan navigasi dan pagination jika hanya ada 1 slide
                 if (slideCount <= 1) {
-                    const pagination = document.querySelector('.swiper-pagination');
-                    
                     if (pagination) pagination.style.display = 'none';
                     if (nextBtn) nextBtn.style.display = 'none';
                     if (prevBtn) prevBtn.style.display = 'none';
@@ -617,42 +780,6 @@
                         return $jabatan === 'Sekretaris';
                     }) : collect();
                 @endphp
-                
-                {{-- @if($sekretaris->isNotEmpty())
-                <div class="flex justify-center mb-16">
-                    @foreach($sekretaris as $jabatan => $pejabatGroup)
-                        @foreach($pejabatGroup as $sekretaris_pejabat)
-                            <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5"> --}}
-                                {{-- Kartu dengan design seperti ID Card --}}
-                                {{-- <div class="bg-white rounded-lg shadow-lg border-t-4 border-blue-600 overflow-hidden">
-                                    <div class="relative p-3 md:p-4 bg-gray-50">
-                                        <div class="absolute top-2 left-4 right-4 border-t-2 border-dashed border-blue-400"></div>
-                                    </div>
-                                     --}}
-                                    {{-- Foto --}}
-                                    {{-- <div class="px-4 md:px-6 pt-4">
-                                        <div class="w-24 h-32 sm:w-28 sm:h-36 md:w-32 md:h-40 mx-auto rounded-lg overflow-hidden border-2 border-gray-200">
-                                            <img src="{{ $sekretaris_pejabat->photo ? asset('storage/' . $sekretaris_pejabat->photo) : 'https://placehold.co/600x400/e2e8f0/adb5bd?text=Foto' }}" 
-                                                 alt="{{ $sekretaris_pejabat->name }}" 
-                                                 class="w-full h-full object-cover">
-                                        </div>
-                                    </div> --}}
-                                    
-                                    {{-- Info Text --}}
-                                    {{-- <div class="p-4 md:p-6 text-center">
-                                        <h3 class="font-bold text-base md:text-lg text-gray-900 mb-1">{{ $sekretaris_pejabat->name }}</h3>
-                                        <p class="text-gray-600 font-medium mb-2 text-sm md:text-base">{{ $sekretaris_pejabat->jabatan }}</p>
-                                        @if($sekretaris_pejabat->nip)
-                                        <p class="text-xs md:text-sm text-gray-500">NIP. {{ $sekretaris_pejabat->nip }}</p>
-                                        @endif
-                                    </div>
-                                    <div class="h-2 bg-blue-600"></div>
-                                </div> --}}
-                            {{-- </div>
-                        @endforeach
-                    @endforeach
-                </div>
-                @endif --}}
 
                 {{-- Pesan jika tidak ada data --}}
                 @if(!$pimpinan && (!isset($groupedPejabats) || $sekretaris->isEmpty()))

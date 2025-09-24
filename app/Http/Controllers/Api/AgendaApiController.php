@@ -2,93 +2,91 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AgendaStatus;
 use App\Http\Controllers\Controller;
-use App\Http\Traits\FileUploadTrait;
 use App\Models\Agenda;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 class AgendaApiController extends Controller
 {
-    use FileUploadTrait;
-
     /**
      * @OA\Get(
      * path="/api/agendas",
      * operationId="getAgendaList",
      * tags={"Agenda"},
      * summary="Menampilkan daftar semua agenda kegiatan",
-     * @OA\Parameter(
-     *     name="search",
-     *     in="query",
-     *     description="Pencarian berdasarkan judul atau deskripsi",
-     *     @OA\Schema(type="string")
-     * ),
-     * @OA\Parameter(
-     *     name="month",
-     *     in="query",
-     *     description="Filter berdasarkan bulan (1-12)",
-     *     @OA\Schema(type="integer", minimum=1, maximum=12)
-     * ),
-     * @OA\Parameter(
-     *     name="year",
-     *     in="query",
-     *     description="Filter berdasarkan tahun",
-     *     @OA\Schema(type="integer")
-     * ),
-     * @OA\Parameter(
-     *     name="limit",
-     *     in="query",
-     *     description="Jumlah data per halaman (default: 10)",
-     *     @OA\Schema(type="integer", minimum=1, maximum=100)
-     * ),
+     * description="Mengambil daftar agenda yang sudah dipaginasi. Mendukung pencarian dan filter berdasarkan bulan dan tahun.",
+     * @OA\Parameter(name="search", in="query", description="Pencarian berdasarkan judul atau deskripsi", @OA\Schema(type="string")),
+     * @OA\Parameter(name="month", in="query", description="Filter berdasarkan bulan (1-12)", @OA\Schema(type="integer", minimum=1, maximum=12)),
+     * @OA\Parameter(name="year", in="query", description="Filter berdasarkan tahun", @OA\Schema(type="integer")),
+     * @OA\Parameter(name="limit", in="query", description="Jumlah data per halaman (default: 10)", @OA\Schema(type="integer", minimum=1, maximum=100)),
      * @OA\Response(
-     *     response=200,
-     *     description="Operasi berhasil",
-     *     @OA\JsonContent(
-     *         type="object",
-     *         @OA\Property(property="current_page", type="integer", example=1),
-     *         @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/Agenda")),
-     *         @OA\Property(property="first_page_url", type="string", example="http://127.0.0.1:8000/api/agendas?page=1"),
-     *         @OA\Property(property="from", type="integer", example=1),
-     *         @OA\Property(property="last_page", type="integer", example=5),
-     *         @OA\Property(property="last_page_url", type="string", example="http://127.0.0.1:8000/api/agendas?page=5"),
-     *         @OA\Property(property="next_page_url", type="string", nullable=true, example="http://127.0.0.1:8000/api/agendas?page=2"),
-     *         @OA\Property(property="path", type="string", example="http://127.0.0.1:8000/api/agendas"),
-     *         @OA\Property(property="per_page", type="integer", example=10),
-     *         @OA\Property(property="prev_page_url", type="string", nullable=true),
-     *         @OA\Property(property="to", type="integer", example=10),
-     *         @OA\Property(property="total", type="integer", example=45)
-     *     )
+     * response=200,
+     * description="Operasi berhasil",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="current_page", type="integer", example=1),
+     * @OA\Property(
+     * property="data",
+     * type="array",
+     * @OA\Items(
+     * type="object",
+     * @OA\Property(property="id", type="integer", readOnly=true, example=1),
+     * @OA\Property(property="title", type="string", example="Rapat Koordinasi Bulanan"),
+     * @OA\Property(property="slug", type="string", readOnly=true, example="rapat-koordinasi-bulanan"),
+     * @OA\Property(property="description", type="string", example="Rapat untuk membahas evaluasi kinerja."),
+     * @OA\Property(property="start_date", type="string", format="date", example="2025-09-24"),
+     * @OA\Property(property="end_date", type="string", format="date", nullable=true, example="2025-09-25"),
+     * @OA\Property(property="start_time", type="string", format="time", nullable=true, example="09:00:00"),
+     * @OA\Property(property="end_time", type="string", format="time", nullable=true, example="11:00:00"),
+     * @OA\Property(property="status", type="string", enum={"upcoming", "ongoing", "completed", "cancelled"}, example="ongoing"),
+     * @OA\Property(property="file_path", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="file_url", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="created_at", type="string", format="date-time", readOnly=true),
+     * @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true)
+     * )
+     * ),
+     * @OA\Property(property="first_page_url", type="string"),
+     * @OA\Property(property="from", type="integer"),
+     * @OA\Property(property="last_page", type="integer"),
+     * @OA\Property(property="last_page_url", type="string"),
+     * @OA\Property(property="next_page_url", type="string", nullable=true),
+     * @OA\Property(property="path", type="string"),
+     * @OA\Property(property="per_page", type="integer"),
+     * @OA\Property(property="prev_page_url", type="string", nullable=true),
+     * @OA\Property(property="to", type="integer"),
+     * @OA\Property(property="total", type="integer")
+     * )
      * )
      * )
      */
     public function index(Request $request)
     {
+        Agenda::batchUpdateStatus();
         $query = Agenda::query();
-        
-        // Hapus filter kata kunci karena sekarang agenda sederhana
-        // Tampilkan semua agenda tanpa filter kata kunci
 
-        // Search functionality
         if ($request->filled('search')) {
-            $query->search($request->search);
+            $searchTerm = $request->search;
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('title', 'like', '%' . $searchTerm . '%')
+                    ->orWhere('description', 'like', '%' . $searchTerm . '%');
+            });
         }
 
-        // Filter by month
         if ($request->filled('month')) {
-            $query->byMonth($request->month);
+            $query->whereMonth('start_date', $request->month);
         }
 
-        // Filter by year
         if ($request->filled('year')) {
-            $query->byYear($request->year);
+            $query->whereYear('start_date', $request->year);
         }
 
         $limit = $request->get('limit', 10);
-        $limit = min(max($limit, 1), 100); // Batasi antara 1-100
+        $limit = min(max($limit, 1), 100);
 
-        $agendas = $query->latest()->paginate($limit);
+        $agendas = $query->orderBy('start_date', 'desc')->paginate($limit);
 
         return response()->json($agendas);
     }
@@ -99,18 +97,32 @@ class AgendaApiController extends Controller
      * operationId="getAgendaBySlug",
      * tags={"Agenda"},
      * summary="Menampilkan detail satu agenda",
-     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda"),
+     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda-unik"),
      * @OA\Response(
-     *     response=200,
-     *     description="Operasi berhasil",
-     *     @OA\JsonContent(ref="#/components/schemas/Agenda")
+     * response=200,
+     * description="Operasi berhasil",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="id", type="integer", readOnly=true, example=1),
+     * @OA\Property(property="title", type="string", example="Rapat Koordinasi Bulanan"),
+     * @OA\Property(property="slug", type="string", readOnly=true, example="rapat-koordinasi-bulanan"),
+     * @OA\Property(property="description", type="string", example="Rapat untuk membahas evaluasi kinerja."),
+     * @OA\Property(property="start_date", type="string", format="date", example="2025-09-24"),
+     * @OA\Property(property="end_date", type="string", format="date", nullable=true, example="2025-09-25"),
+     * @OA\Property(property="start_time", type="string", format="time", nullable=true, example="09:00:00"),
+     * @OA\Property(property="end_time", type="string", format="time", nullable=true, example="11:00:00"),
+     * @OA\Property(property="status", type="string", enum={"upcoming", "ongoing", "completed", "cancelled"}, example="ongoing"),
+     * @OA\Property(property="file_path", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="file_url", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="created_at", type="string", format="date-time", readOnly=true),
+     * @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true)
+     * )
      * ),
-     * @OA\Response(response=404, description="Data tidak ditemukan")
+     * @OA\Response(response=404, description="Data tidak ditemukan", @OA\JsonContent(@OA\Property(property="message", type="string", example="Data tidak ditemukan.")))
      * )
      */
     public function show(Agenda $agenda)
     {
-        // Menggunakan model binding dengan slug
         return response()->json($agenda);
     }
 
@@ -122,149 +134,173 @@ class AgendaApiController extends Controller
      * summary="Membuat agenda baru (memerlukan token)",
      * security={ {"bearerAuth": {} }},
      * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             required={"title", "description"},
-     *             @OA\Property(
-     *                 property="title",
-     *                 type="string",
-     *                 maxLength=255,
-     *                 description="Judul agenda kegiatan",
-     *                 example="Rapat Koordinasi Bulanan"
-     *             ),
-     *             @OA\Property(
-     *                 property="description",
-     *                 type="string",
-     *                 minLength=10,
-     *                 description="Deskripsi detail kegiatan agenda (minimal 10 karakter)",
-     *                 example="Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan."
-     *             ),
-     *             @OA\Property(
-     *                 property="file",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB."
-     *             )
-     *         )
-     *     )
+     * required=true,
+     * @OA\MediaType(
+     * mediaType="multipart/form-data",
+     * @OA\Schema(
+     * required={"title", "description", "start_date"},
+     * @OA\Property(property="title", type="string", maxLength=255, example="Rapat Koordinasi Awal Tahun"),
+     * @OA\Property(property="description", type="string", minLength=10, example="Pembahasan rencana kerja tahunan."),
+     * @OA\Property(property="start_date", type="string", format="date", description="Tanggal mulai agenda (Wajib)", example="2025-10-28"),
+     * @OA\Property(property="end_date", type="string", format="date", description="Tanggal selesai agenda (Opsional)", example="2025-10-29"),
+     * @OA\Property(property="start_time", type="string", format="time", description="Waktu mulai (Opsional, format HH:MM)", example="09:00"),
+     * @OA\Property(property="end_time", type="string", format="time", description="Waktu selesai (Opsional, format HH:MM)", example="11:00"),
+     * @OA\Property(property="status", type="string", enum={"cancelled"}, description="Hanya diisi 'cancelled' jika ingin membatalkan agenda secara manual."),
+     * @OA\Property(property="file", type="string", format="binary", description="File lampiran (opsional, maks 5MB)")
+     * )
+     * )
      * ),
      * @OA\Response(
-     *     response=201,
-     *     description="Agenda berhasil dibuat",
-     *     @OA\JsonContent(ref="#/components/schemas/Agenda")
+     * response=201,
+     * description="Agenda berhasil dibuat",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="id", type="integer", readOnly=true, example=1),
+     * @OA\Property(property="title", type="string", example="Rapat Koordinasi Bulanan"),
+     * @OA\Property(property="slug", type="string", readOnly=true, example="rapat-koordinasi-bulanan"),
+     * @OA\Property(property="description", type="string", example="Rapat untuk membahas evaluasi kinerja."),
+     * @OA\Property(property="start_date", type="string", format="date", example="2025-09-24"),
+     * @OA\Property(property="end_date", type="string", format="date", nullable=true, example="2025-09-25"),
+     * @OA\Property(property="start_time", type="string", format="time", nullable=true, example="09:00:00"),
+     * @OA\Property(property="end_time", type="string", format="time", nullable=true, example="11:00:00"),
+     * @OA\Property(property="status", type="string", enum={"upcoming", "ongoing", "completed", "cancelled"}, example="ongoing"),
+     * @OA\Property(property="file_path", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="file_url", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="created_at", type="string", format="date-time", readOnly=true),
+     * @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true)
+     * )
      * ),
-     * @OA\Response(response=401, description="Unauthenticated"),
-     * @OA\Response(response=422, description="Validation Error")
+     * @OA\Response(response=401, description="Unauthenticated", @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthenticated."))),
+     * @OA\Response(
+     * response=422,
+     * description="Validation Error",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="message", type="string", example="The given data was invalid."),
+     * @OA\Property(property="errors", type="object", example={"title": {"Judul agenda wajib diisi."}})
+     * )
+     * )
      * )
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // Max 10MB
-        ], [
-            'title.required' => 'Judul agenda wajib diisi.',
-            'title.max' => 'Judul agenda maksimal 255 karakter.',
-            'description.required' => 'Deskripsi kegiatan wajib diisi.',
-            'description.min' => 'Deskripsi kegiatan minimal 10 karakter.',
-            'file.mimes' => 'File harus berformat PDF, DOC, DOCX, XLS, XLSX, PPT, atau PPTX.',
-            'file.max' => 'Ukuran file maksimal 10MB.',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'status' => 'nullable|in:cancelled',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120',
         ]);
 
-        // Handle file upload jika ada
-        if ($request->hasFile('file')) {
-            $data['file_path'] = $this->handleFileUpload($request, 'file', 'unduhan');
-            unset($data['file']); // Hapus key 'file' karena tidak ada di database
+        $status = $this->determineStatus(
+            $request->start_date,
+            $request->end_date,
+            $request->start_time,
+            $request->end_time
+        );
+
+        if ($request->status === AgendaStatus::CANCELLED->value) {
+            $status = AgendaStatus::CANCELLED;
         }
 
-        $agenda = Agenda::create($data);
+        $validatedData['status'] = $status;
+
+        if ($request->hasFile('file')) {
+            $path = $request->file('file')->store('agenda', 'public');
+            $validatedData['file_path'] = $path;
+        }
+        unset($validatedData['file']);
+
+        $agenda = Agenda::create($validatedData);
 
         return response()->json($agenda, 201);
     }
 
     /**
-     * @OA\Put(
+     * @OA\Post(
      * path="/api/agendas/{slug}",
      * operationId="updateAgenda",
      * tags={"Agenda"},
-     * summary="Memperbarui agenda yang ada (memerlukan token)",
+     * summary="Memperbarui agenda (gunakan metode POST dengan _method=PUT)",
      * security={ {"bearerAuth": {} }},
-     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda"),
+     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda-unik"),
      * @OA\RequestBody(
-     *     required=true,
-     *     @OA\MediaType(
-     *         mediaType="multipart/form-data",
-     *         @OA\Schema(
-     *             @OA\Property(
-     *                 property="title",
-     *                 type="string",
-     *                 maxLength=255,
-     *                 description="Judul agenda kegiatan (opsional untuk update)",
-     *                 example="Rapat Koordinasi Bulanan API Updated"
-     *             ),
-     *             @OA\Property(
-     *                 property="description",
-     *                 type="string",
-     *                 minLength=10,
-     *                 description="Deskripsi detail kegiatan agenda (opsional untuk update, minimal 10 karakter jika diisi)",
-     *                 example="Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan. Updated via API"
-     *             ),
-     *             @OA\Property(
-     *                 property="file",
-     *                 type="string",
-     *                 format="binary",
-     *                 description="File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB."
-     *             )
-     *         )
-     *     )
+     * @OA\MediaType(
+     * mediaType="multipart/form-data",
+     * @OA\Schema(
+     * required={"_method"},
+     * @OA\Property(property="_method", type="string", enum={"PUT"}, example="PUT", description="Wajib diisi 'PUT' untuk update"),
+     * @OA\Property(property="title", type="string", maxLength=255, example="Judul Rapat Diperbarui"),
+     * @OA\Property(property="description", type="string", minLength=10, example="Deskripsi diperbarui."),
+     * @OA\Property(property="start_date", type="string", format="date", example="2025-11-01"),
+     * @OA\Property(property="end_date", type="string", format="date", example="2025-11-01"),
+     * @OA\Property(property="start_time", type="string", format="time", example="10:00"),
+     * @OA\Property(property="end_time", type="string", format="time", example="12:00"),
+     * @OA\Property(property="status", type="string", enum={"upcoming", "ongoing", "completed", "cancelled"}, example="upcoming"),
+     * @OA\Property(property="file", type="string", format="binary", description="File baru untuk menggantikan yang lama (opsional)")
+     * )
+     * )
      * ),
      * @OA\Response(
-     *     response=200,
-     *     description="Agenda berhasil diperbarui",
-     *     @OA\JsonContent(ref="#/components/schemas/Agenda")
+     * response=200,
+     * description="Agenda berhasil diperbarui",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="id", type="integer", readOnly=true, example=1),
+     * @OA\Property(property="title", type="string", example="Rapat Koordinasi Bulanan"),
+     * @OA\Property(property="slug", type="string", readOnly=true, example="rapat-koordinasi-bulanan"),
+     * @OA\Property(property="description", type="string", example="Rapat untuk membahas evaluasi kinerja."),
+     * @OA\Property(property="start_date", type="string", format="date", example="2025-09-24"),
+     * @OA\Property(property="end_date", type="string", format="date", nullable=true, example="2025-09-25"),
+     * @OA\Property(property="start_time", type="string", format="time", nullable=true, example="09:00:00"),
+     * @OA\Property(property="end_time", type="string", format="time", nullable=true, example="11:00:00"),
+     * @OA\Property(property="status", type="string", enum={"upcoming", "ongoing", "completed", "cancelled"}, example="ongoing"),
+     * @OA\Property(property="file_path", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="file_url", type="string", nullable=true, readOnly=true),
+     * @OA\Property(property="created_at", type="string", format="date-time", readOnly=true),
+     * @OA\Property(property="updated_at", type="string", format="date-time", readOnly=true)
+     * )
      * ),
-     * @OA\Response(response=401, description="Unauthenticated"),
-     * @OA\Response(response=404, description="Data tidak ditemukan"),
-     * @OA\Response(response=422, description="Validation Error")
+     * @OA\Response(response=401, description="Unauthenticated", @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthenticated."))),
+     * @OA\Response(response=404, description="Data tidak ditemukan", @OA\JsonContent(@OA\Property(property="message", type="string", example="Data tidak ditemukan."))),
+     * @OA\Response(
+     * response=422,
+     * description="Validation Error",
+     * @OA\JsonContent(
+     * type="object",
+     * @OA\Property(property="message", type="string", example="The given data was invalid."),
+     * @OA\Property(property="errors", type="object", example={"title": {"Judul agenda wajib diisi."}})
+     * )
+     * )
      * )
      */
     public function update(Request $request, Agenda $agenda)
     {
-        // Menggunakan model binding dengan slug
-        $data = $request->validate([
-            'title' => 'nullable|string|max:255',
-            'description' => 'nullable|string|min:10',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // Max 10MB
-        ], [
-            'title.max' => 'Judul agenda maksimal 255 karakter.',
-            'description.min' => 'Deskripsi kegiatan minimal 10 karakter.',
-            'file.mimes' => 'File harus berformat PDF, DOC, DOCX, XLS, XLSX, PPT, atau PPTX.',
-            'file.max' => 'Ukuran file maksimal 10MB.',
+        $validatedData = $request->validate([
+            'title' => 'sometimes|required|string|max:255',
+            'description' => 'sometimes|required|string|min:10',
+            'start_date' => 'sometimes|required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'status' => 'sometimes|required|in:' . implode(',', array_column(AgendaStatus::cases(), 'value')),
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120',
         ]);
 
-        // Hapus field yang null atau kosong dari array update
-        $data = array_filter($data, function($value) {
-            return $value !== null && $value !== '';
-        });
-
-        // Handle file upload jika ada
         if ($request->hasFile('file')) {
-            // Hapus file lama jika ada
             if ($agenda->file_path && Storage::disk('public')->exists($agenda->file_path)) {
                 Storage::disk('public')->delete($agenda->file_path);
             }
-            
-            $data['file_path'] = $this->handleFileUpload($request, 'file', 'unduhan');
-            unset($data['file']); // Hapus key 'file' karena tidak ada di database
+            $path = $request->file('file')->store('agenda', 'public');
+            $validatedData['file_path'] = $path;
         }
+        unset($validatedData['file']);
 
-        // Hanya update jika ada data yang akan diubah
-        if (!empty($data)) {
-            $agenda->update($data);
-        }
+        $agenda->update($validatedData);
+        $agenda->refresh();
 
         return response()->json($agenda);
     }
@@ -276,22 +312,18 @@ class AgendaApiController extends Controller
      * tags={"Agenda"},
      * summary="Menghapus agenda (memerlukan token)",
      * security={ {"bearerAuth": {} }},
-     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda"),
+     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda-unik"),
      * @OA\Response(response=204, description="Agenda berhasil dihapus"),
-     * @OA\Response(response=401, description="Unauthenticated"),
-     * @OA\Response(response=404, description="Data tidak ditemukan")
+     * @OA\Response(response=401, description="Unauthenticated", @OA\JsonContent(@OA\Property(property="message", type="string", example="Unauthenticated."))),
+     * @OA\Response(response=404, description="Data tidak ditemukan", @OA\JsonContent(@OA\Property(property="message", type="string", example="Data tidak ditemukan.")))
      * )
      */
     public function destroy(Agenda $agenda)
     {
-        // Menggunakan model binding dengan slug
-        // Hapus file jika ada dan path tidak kosong
-        if ($agenda->file_path && !empty(trim($agenda->file_path))) {
-            if (Storage::disk('public')->exists($agenda->file_path)) {
-                Storage::disk('public')->delete($agenda->file_path);
-            }
+        if ($agenda->file_path && Storage::disk('public')->exists($agenda->file_path)) {
+            Storage::disk('public')->delete($agenda->file_path);
         }
-        
+
         $agenda->delete();
 
         return response()->json(null, 204);
@@ -303,25 +335,38 @@ class AgendaApiController extends Controller
      * operationId="downloadAgendaFile",
      * tags={"Agenda"},
      * summary="Mengunduh file agenda",
-     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda"),
-     * @OA\Response(
-     *     response=200,
-     *     description="File berhasil diunduh",
-     *     @OA\MediaType(mediaType="application/octet-stream")
-     * ),
-     * @OA\Response(response=404, description="Data atau file tidak ditemukan")
+     * @OA\Parameter(name="slug", in="path", required=true, @OA\Schema(type="string"), example="contoh-agenda-unik"),
+     * @OA\Response(response=200, description="File berhasil diunduh", @OA\MediaType(mediaType="application/octet-stream")),
+     * @OA\Response(response=404, description="Data atau file tidak ditemukan", @OA\JsonContent(@OA\Property(property="message", type="string", example="File tidak ditemukan.")))
      * )
      */
     public function download(Agenda $agenda)
     {
-        // Menggunakan model binding dengan slug
         if (!$agenda->file_path || !Storage::disk('public')->exists($agenda->file_path)) {
-            return response()->json(['error' => 'File tidak ditemukan'], 404);
+            return response()->json(['message' => 'File tidak ditemukan'], 404);
         }
 
         $filePath = storage_path('app/public/' . $agenda->file_path);
-        $fileName = $agenda->title . '.' . pathinfo($agenda->file_path, PATHINFO_EXTENSION);
+        $fileName = Str::slug($agenda->title) . '.' . pathinfo($agenda->file_path, PATHINFO_EXTENSION);
 
         return response()->download($filePath, $fileName);
+    }
+
+    /**
+     * Helper function untuk menentukan status agenda secara otomatis.
+     */
+    private function determineStatus($startDate, $endDate, $startTime, $endTime): AgendaStatus
+    {
+        $now = Carbon::now();
+        $startDateTime = Carbon::parse($startDate . ' ' . ($startTime ?? '00:00:00'));
+        $endDateTime = Carbon::parse(($endDate ?? $startDate) . ' ' . ($endTime ?? '23:59:59'));
+
+        if ($now->lt($startDateTime)) {
+            return AgendaStatus::UPCOMING;
+        } elseif ($now->between($startDateTime, $endDateTime)) {
+            return AgendaStatus::ONGOING;
+        } else {
+            return AgendaStatus::COMPLETED;
+        }
     }
 }

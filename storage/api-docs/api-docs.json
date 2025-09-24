@@ -12,6 +12,7 @@
                     "Agenda"
                 ],
                 "summary": "Menampilkan daftar semua agenda kegiatan",
+                "description": "Mengambil daftar agenda yang sudah dipaginasi. Mendukung pencarian dan filter berdasarkan bulan dan tahun.",
                 "operationId": "getAgendaList",
                 "parameters": [
                     {
@@ -65,49 +66,113 @@
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/Agenda"
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "readOnly": true,
+                                                        "example": 1
+                                                    },
+                                                    "title": {
+                                                        "type": "string",
+                                                        "example": "Rapat Koordinasi Bulanan"
+                                                    },
+                                                    "slug": {
+                                                        "type": "string",
+                                                        "readOnly": true,
+                                                        "example": "rapat-koordinasi-bulanan"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Rapat untuk membahas evaluasi kinerja."
+                                                    },
+                                                    "start_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-09-24"
+                                                    },
+                                                    "end_date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-09-25",
+                                                        "nullable": true
+                                                    },
+                                                    "start_time": {
+                                                        "type": "string",
+                                                        "format": "time",
+                                                        "example": "09:00:00",
+                                                        "nullable": true
+                                                    },
+                                                    "end_time": {
+                                                        "type": "string",
+                                                        "format": "time",
+                                                        "example": "11:00:00",
+                                                        "nullable": true
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "upcoming",
+                                                            "ongoing",
+                                                            "completed",
+                                                            "cancelled"
+                                                        ],
+                                                        "example": "ongoing"
+                                                    },
+                                                    "file_path": {
+                                                        "type": "string",
+                                                        "readOnly": true,
+                                                        "nullable": true
+                                                    },
+                                                    "file_url": {
+                                                        "type": "string",
+                                                        "readOnly": true,
+                                                        "nullable": true
+                                                    },
+                                                    "created_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "readOnly": true
+                                                    },
+                                                    "updated_at": {
+                                                        "type": "string",
+                                                        "format": "date-time",
+                                                        "readOnly": true
+                                                    }
+                                                },
+                                                "type": "object"
                                             }
                                         },
                                         "first_page_url": {
-                                            "type": "string",
-                                            "example": "http://127.0.0.1:8000/api/agendas?page=1"
+                                            "type": "string"
                                         },
                                         "from": {
-                                            "type": "integer",
-                                            "example": 1
+                                            "type": "integer"
                                         },
                                         "last_page": {
-                                            "type": "integer",
-                                            "example": 5
+                                            "type": "integer"
                                         },
                                         "last_page_url": {
-                                            "type": "string",
-                                            "example": "http://127.0.0.1:8000/api/agendas?page=5"
+                                            "type": "string"
                                         },
                                         "next_page_url": {
                                             "type": "string",
-                                            "example": "http://127.0.0.1:8000/api/agendas?page=2",
                                             "nullable": true
                                         },
                                         "path": {
-                                            "type": "string",
-                                            "example": "http://127.0.0.1:8000/api/agendas"
+                                            "type": "string"
                                         },
                                         "per_page": {
-                                            "type": "integer",
-                                            "example": 10
+                                            "type": "integer"
                                         },
                                         "prev_page_url": {
                                             "type": "string",
                                             "nullable": true
                                         },
                                         "to": {
-                                            "type": "integer",
-                                            "example": 10
+                                            "type": "integer"
                                         },
                                         "total": {
-                                            "type": "integer",
-                                            "example": 45
+                                            "type": "integer"
                                         }
                                     },
                                     "type": "object"
@@ -130,23 +195,53 @@
                             "schema": {
                                 "required": [
                                     "title",
-                                    "description"
+                                    "description",
+                                    "start_date"
                                 ],
                                 "properties": {
                                     "title": {
-                                        "description": "Judul agenda kegiatan",
                                         "type": "string",
                                         "maxLength": 255,
-                                        "example": "Rapat Koordinasi Bulanan"
+                                        "example": "Rapat Koordinasi Awal Tahun"
                                     },
                                     "description": {
-                                        "description": "Deskripsi detail kegiatan agenda (minimal 10 karakter)",
                                         "type": "string",
                                         "minLength": 10,
-                                        "example": "Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan."
+                                        "example": "Pembahasan rencana kerja tahunan."
+                                    },
+                                    "start_date": {
+                                        "description": "Tanggal mulai agenda (Wajib)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-28"
+                                    },
+                                    "end_date": {
+                                        "description": "Tanggal selesai agenda (Opsional)",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-10-29"
+                                    },
+                                    "start_time": {
+                                        "description": "Waktu mulai (Opsional, format HH:MM)",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "09:00"
+                                    },
+                                    "end_time": {
+                                        "description": "Waktu selesai (Opsional, format HH:MM)",
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "11:00"
+                                    },
+                                    "status": {
+                                        "description": "Hanya diisi 'cancelled' jika ingin membatalkan agenda secara manual.",
+                                        "type": "string",
+                                        "enum": [
+                                            "cancelled"
+                                        ]
                                     },
                                     "file": {
-                                        "description": "File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB.",
+                                        "description": "File lampiran (opsional, maks 5MB)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -162,16 +257,123 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Agenda"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "readOnly": true,
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Rapat Koordinasi Bulanan"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "rapat-koordinasi-bulanan"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Rapat untuk membahas evaluasi kinerja."
+                                        },
+                                        "start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-24"
+                                        },
+                                        "end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-25",
+                                            "nullable": true
+                                        },
+                                        "start_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "09:00:00",
+                                            "nullable": true
+                                        },
+                                        "end_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "11:00:00",
+                                            "nullable": true
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "upcoming",
+                                                "ongoing",
+                                                "completed",
+                                                "cancelled"
+                                            ],
+                                            "example": "ongoing"
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "title": [
+                                                    "Judul agenda wajib diisi."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -196,7 +398,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "contoh-agenda"
+                        "example": "contoh-agenda-unik"
                     }
                 ],
                 "responses": {
@@ -205,21 +407,107 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Agenda"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "readOnly": true,
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Rapat Koordinasi Bulanan"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "rapat-koordinasi-bulanan"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Rapat untuk membahas evaluasi kinerja."
+                                        },
+                                        "start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-24"
+                                        },
+                                        "end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-25",
+                                            "nullable": true
+                                        },
+                                        "start_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "09:00:00",
+                                            "nullable": true
+                                        },
+                                        "end_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "11:00:00",
+                                            "nullable": true
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "upcoming",
+                                                "ongoing",
+                                                "completed",
+                                                "cancelled"
+                                            ],
+                                            "example": "ongoing"
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "404": {
-                        "description": "Data tidak ditemukan"
+                        "description": "Data tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data tidak ditemukan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             },
-            "put": {
+            "post": {
                 "tags": [
                     "Agenda"
                 ],
-                "summary": "Memperbarui agenda yang ada (memerlukan token)",
+                "summary": "Memperbarui agenda (gunakan metode POST dengan _method=PUT)",
                 "operationId": "updateAgenda",
                 "parameters": [
                     {
@@ -229,29 +517,67 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "contoh-agenda"
+                        "example": "contoh-agenda-unik"
                     }
                 ],
                 "requestBody": {
-                    "required": true,
                     "content": {
                         "multipart/form-data": {
                             "schema": {
+                                "required": [
+                                    "_method"
+                                ],
                                 "properties": {
+                                    "_method": {
+                                        "description": "Wajib diisi 'PUT' untuk update",
+                                        "type": "string",
+                                        "enum": [
+                                            "PUT"
+                                        ],
+                                        "example": "PUT"
+                                    },
                                     "title": {
-                                        "description": "Judul agenda kegiatan (opsional untuk update)",
                                         "type": "string",
                                         "maxLength": 255,
-                                        "example": "Rapat Koordinasi Bulanan API Updated"
+                                        "example": "Judul Rapat Diperbarui"
                                     },
                                     "description": {
-                                        "description": "Deskripsi detail kegiatan agenda (opsional untuk update, minimal 10 karakter jika diisi)",
                                         "type": "string",
                                         "minLength": 10,
-                                        "example": "Rapat koordinasi bulanan untuk evaluasi kinerja pegawai dan pembahasan program kerja bulan depan. Updated via API"
+                                        "example": "Deskripsi diperbarui."
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-01"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-11-01"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "10:00"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "format": "time",
+                                        "example": "12:00"
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "upcoming",
+                                            "ongoing",
+                                            "completed",
+                                            "cancelled"
+                                        ],
+                                        "example": "upcoming"
                                     },
                                     "file": {
-                                        "description": "File dokumen agenda (opsional). Format: PDF, DOC, DOCX, XLS, XLSX, PPT, PPTX. Maksimal 10MB.",
+                                        "description": "File baru untuk menggantikan yang lama (opsional)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -267,19 +593,139 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Agenda"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "readOnly": true,
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Rapat Koordinasi Bulanan"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "rapat-koordinasi-bulanan"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Rapat untuk membahas evaluasi kinerja."
+                                        },
+                                        "start_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-24"
+                                        },
+                                        "end_date": {
+                                            "type": "string",
+                                            "format": "date",
+                                            "example": "2025-09-25",
+                                            "nullable": true
+                                        },
+                                        "start_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "09:00:00",
+                                            "nullable": true
+                                        },
+                                        "end_time": {
+                                            "type": "string",
+                                            "format": "time",
+                                            "example": "11:00:00",
+                                            "nullable": true
+                                        },
+                                        "status": {
+                                            "type": "string",
+                                            "enum": [
+                                                "upcoming",
+                                                "ongoing",
+                                                "completed",
+                                                "cancelled"
+                                            ],
+                                            "example": "ongoing"
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "nullable": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "readOnly": true
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Data tidak ditemukan"
+                        "description": "Data tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data tidak ditemukan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation Error"
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": {
+                                                "title": [
+                                                    "Judul agenda wajib diisi."
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -302,7 +748,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "contoh-agenda"
+                        "example": "contoh-agenda-unik"
                     }
                 ],
                 "responses": {
@@ -310,10 +756,36 @@
                         "description": "Agenda berhasil dihapus"
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthenticated",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Unauthenticated."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "404": {
-                        "description": "Data tidak ditemukan"
+                        "description": "Data tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Data tidak ditemukan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -338,7 +810,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "example": "contoh-agenda"
+                        "example": "contoh-agenda-unik"
                     }
                 ],
                 "responses": {
@@ -349,7 +821,20 @@
                         }
                     },
                     "404": {
-                        "description": "Data atau file tidak ditemukan"
+                        "description": "Data atau file tidak ditemukan",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "File tidak ditemukan."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1769,7 +2254,42 @@
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Unduhan"
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "title": {
+                                                "type": "string",
+                                                "example": "Dokumen Penting"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Deskripsi singkat dokumen."
+                                            },
+                                            "file_path": {
+                                                "type": "string",
+                                                "readOnly": true
+                                            },
+                                            "original_filename": {
+                                                "type": "string",
+                                                "readOnly": true,
+                                                "example": "nama_asli_dokumen.pdf"
+                                            },
+                                            "file_url": {
+                                                "type": "string",
+                                                "readOnly": true
+                                            },
+                                            "created_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            },
+                                            "updated_at": {
+                                                "type": "string",
+                                                "format": "date-time"
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -1794,13 +2314,16 @@
                                 ],
                                 "properties": {
                                     "title": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Judul File Baru"
                                     },
                                     "description": {
                                         "description": "Deskripsi file (opsional)",
-                                        "type": "string"
+                                        "type": "string",
+                                        "example": "Ini adalah deskripsi file."
                                     },
                                     "file": {
+                                        "description": "File yang akan diunggah (Maks 5MB)",
                                         "type": "string",
                                         "format": "binary"
                                     }
@@ -1816,13 +2339,51 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Unduhan"
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Dokumen Penting"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Deskripsi singkat dokumen."
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "original_filename": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "nama_asli_dokumen.pdf"
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation Error"
                     }
                 },
                 "security": [
@@ -1833,6 +2394,171 @@
             }
         },
         "/api/unduhans/{id}": {
+            "get": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Menampilkan detail satu file unduhan",
+                "operationId": "getUnduhanById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Operasi berhasil",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Dokumen Penting"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Deskripsi singkat dokumen."
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "original_filename": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "nama_asli_dokumen.pdf"
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Memperbarui data unduhan (tanpa file)",
+                "operationId": "updateUnduhan",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Judul File Diperbarui"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Deskripsi diperbarui."
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Data berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Dokumen Penting"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Deskripsi singkat dokumen."
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "original_filename": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "nama_asli_dokumen.pdf"
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "delete": {
                 "tags": [
                     "Unduhan"
@@ -1855,6 +2581,9 @@
                     },
                     "401": {
                         "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
                     }
                 },
                 "security": [
@@ -1862,6 +2591,144 @@
                         "bearerAuth": []
                     }
                 ]
+            }
+        },
+        "/api/unduhans/{id}/update-file": {
+            "post": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Memperbarui file unduhan",
+                "operationId": "updateUnduhanFile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "file"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Judul File Diperbarui"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Deskripsi diperbarui."
+                                    },
+                                    "file": {
+                                        "description": "File baru untuk menggantikan yang lama (maksimal 5MB)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "File berhasil diperbarui",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Dokumen Penting"
+                                        },
+                                        "description": {
+                                            "type": "string",
+                                            "example": "Deskripsi singkat dokumen."
+                                        },
+                                        "file_path": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "original_filename": {
+                                            "type": "string",
+                                            "readOnly": true,
+                                            "example": "nama_asli_dokumen.pdf"
+                                        },
+                                        "file_url": {
+                                            "type": "string",
+                                            "readOnly": true
+                                        },
+                                        "created_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        },
+                                        "updated_at": {
+                                            "type": "string",
+                                            "format": "date-time"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Data tidak ditemukan"
+                    },
+                    "422": {
+                        "description": "Validation Error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/unduhans/{id}/download": {
+            "get": {
+                "tags": [
+                    "Unduhan"
+                ],
+                "summary": "Mengunduh file unduhan",
+                "operationId": "downloadUnduhanFile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "File berhasil diunduh",
+                        "content": {
+                            "application/octet-stream": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Data atau file tidak ditemukan"
+                    }
+                }
             }
         },
         "/api/visi-misi": {

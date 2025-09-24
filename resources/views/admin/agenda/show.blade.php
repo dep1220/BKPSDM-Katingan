@@ -106,6 +106,78 @@
                             </div>
                         </div>
 
+                        <!-- Jadwal -->
+                        <div class="mb-8">
+                            <h2 class="text-lg font-semibold text-gray-900 mb-4">Jadwal</h2>
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- Tanggal -->
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium text-gray-900">Tanggal</div>
+                                            <div class="text-sm text-gray-600">
+                                                @if($agenda->start_date)
+                                                    {{ $agenda->start_date->format('d F Y') }}
+                                                    @if($agenda->end_date && $agenda->end_date != $agenda->start_date)
+                                                        - {{ $agenda->end_date->format('d F Y') }}
+                                                    @endif
+                                                @else
+                                                    <span class="text-gray-500">Belum diset</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Waktu -->
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-green-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <div>
+                                            <div class="font-medium text-gray-900">Waktu</div>
+                                            <div class="text-sm text-gray-600">
+                                                @if($agenda->start_time)
+                                                    {{ $agenda->start_time }}
+                                                    @if($agenda->end_time)
+                                                        - {{ $agenda->end_time }}
+                                                    @endif
+                                                    WIB
+                                                @else
+                                                    <span class="text-gray-500">Belum diset</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Status -->
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <svg class="w-5 h-5 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span class="font-medium text-gray-900">Status</span>
+                                        </div>
+                                        <div>
+                                            @if($agenda->status)
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $agenda->status->color() }}">
+                                                    {{ $agenda->status->label() }}
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                                                    Belum diset
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- File Agenda -->
                         <div class="mb-8">
                             <h2 class="text-lg font-semibold text-gray-900 mb-4">File Agenda</h2>
@@ -217,6 +289,47 @@
                                     <span class="text-gray-900">{{ $agenda->updated_at->format('d/m/Y H:i') }}</span>
                                 </div>
                             @endif
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="font-medium text-gray-600">Tanggal Agenda:</span>
+                                <span class="text-gray-900 text-sm">
+                                    @if($agenda->start_date)
+                                        {{ $agenda->start_date->format('d/m/Y') }}
+                                        @if($agenda->end_date && $agenda->end_date != $agenda->start_date)
+                                            - {{ $agenda->end_date->format('d/m/Y') }}
+                                        @endif
+                                    @else
+                                        <span class="text-gray-500">Belum diset</span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="font-medium text-gray-600">Jam Agenda:</span>
+                                <span class="text-gray-900 text-sm">
+                                    @if($agenda->start_time)
+                                        {{ $agenda->start_time }}
+                                        @if($agenda->end_time)
+                                            - {{ $agenda->end_time }}
+                                        @endif
+                                        WIB
+                                    @else
+                                        <span class="text-gray-500">Belum diset</span>
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                <span class="font-medium text-gray-600">Status Agenda:</span>
+                                <span>
+                                    @if($agenda->status)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $agenda->status->color() }}">
+                                            {{ $agenda->status->label() }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                            Belum diset
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
                             <div class="flex justify-between items-center py-2">
                                 <span class="font-medium text-gray-600">Status File:</span>
                                 <span>

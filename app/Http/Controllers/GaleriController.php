@@ -120,7 +120,7 @@ class GaleriController extends Controller
     {
         $validated = $request->validate([
             'title' => 'nullable|string|max:255',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // Increased to 10MB since we'll compress
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // 2MB maksimal
         ]);
 
         // Compress and store image
@@ -158,7 +158,7 @@ class GaleriController extends Controller
         // Aturan validasi
         $rules = [
             'title' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // Increased to 10MB since we'll compress
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048', // 2MB maksimal
         ];
 
         $data = $request->validate($rules);

@@ -28,11 +28,13 @@ Route::get('/beritas/{berita}', [BeritaApiController::class, 'show']);
 Route::get('/beritas/{berita}/download', [BeritaApiController::class, 'downloadAttachment'])->name('api.beritas.download');
 
 // Galeri
-Route::get('/galeris', [GaleriApiController::class, 'index']); 
+Route::get('/galeris', [GaleriApiController::class, 'index']);
 Route::get('/galeris/{galeri}', [GaleriApiController::class, 'show']);
 
 // Unduhan
 Route::get('/unduhans', [UnduhanApiController::class, 'index']);
+Route::get('/unduhans/{unduhan}', [UnduhanApiController::class, 'show']);
+Route::get('/unduhans/{unduhan}/download', [UnduhanApiController::class, 'download']);
 
 // Agenda
 Route::get('/agendas', [AgendaApiController::class, 'index']);
@@ -75,6 +77,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Unduhan Management
     Route::post('/unduhans', [UnduhanApiController::class, 'store']);
+    Route::put('/unduhans/{unduhan}', [UnduhanApiController::class, 'update']);
+    Route::post('/unduhans/{unduhan}/update-file', [UnduhanApiController::class, 'updateFile']);
     Route::delete('/unduhans/{unduhan}', [UnduhanApiController::class, 'destroy']);
 
     // Agenda Management

@@ -9,6 +9,9 @@ class AgendaController extends Controller
 {
     public function index(Request $request)
     {
+        // Update status agenda berdasarkan waktu
+        Agenda::batchUpdateStatus();
+        
         $query = Agenda::query();
 
         // Filter pencarian jika ada
@@ -51,6 +54,9 @@ class AgendaController extends Controller
 
     public function show(Agenda $agenda)
     {
+        // Update status agenda berdasarkan waktu
+        $agenda->updateStatusBasedOnTime();
+        
         return view('public.agenda.show', compact('agenda'));
     }
 }

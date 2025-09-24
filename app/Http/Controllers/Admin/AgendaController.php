@@ -8,6 +8,8 @@ use App\Models\Agenda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
+use App\Enums\AgendaStatus;
 
 class AgendaController extends Controller
 {
@@ -17,8 +19,11 @@ class AgendaController extends Controller
      */
     public function index(Request $request)
     {
+        // Update status agenda berdasarkan waktu
+        Agenda::batchUpdateStatus();
+
         $query = Agenda::query();
-        
+
         // Tampilkan semua agenda tanpa filter kata kunci
 
         // Search functionality
@@ -65,45 +70,98 @@ class AgendaController extends Controller
         return view('admin.agenda.create');
     }
 
-    /**
-     * Store a newly created agenda in storage.
-     */
     public function store(Request $request)
     {
+        // 1. Validasi (Kode validasi Anda sudah bagus!)
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'status' => 'required|in:' . implode(',', array_column(AgendaStatus::cases(), 'value')),
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120', // 5MB max
         ], [
             'title.required' => 'Judul agenda wajib diisi.',
             'title.max' => 'Judul agenda maksimal 255 karakter.',
             'description.required' => 'Deskripsi kegiatan wajib diisi.',
             'description.min' => 'Deskripsi kegiatan minimal 10 karakter.',
+            'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'start_date.date' => 'Tanggal mulai harus berupa tanggal yang valid.',
+            'end_date.date' => 'Tanggal selesai harus berupa tanggal yang valid.',
+            'end_date.after_or_equal' => 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.',
+            'start_time.date_format' => 'Format jam mulai tidak valid (HH:MM).',
+            'end_time.date_format' => 'Format jam selesai tidak valid (HH:MM).',
+            'end_time.after' => 'Jam selesai harus lebih besar dari jam mulai.',
+            'status.required' => 'Status agenda wajib dipilih.',
+            'status.in' => 'Status agenda tidak valid.',
             'file.mimes' => 'File harus berformat PDF, DOC, DOCX, XLS, XLSX, PPT, atau PPTX.',
-            'file.max' => 'Ukuran file maksimal 10MB.',
+            'file.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
-        $data = [
-            'title' => $request->title,
-            'description' => $request->description,
-        ];
+        // 2. Tentukan status otomatis menggunakan helper function
+        $status = $this->determineStatus(
+            $request->start_date,
+            $request->end_date,
+            $request->start_time,
+            $request->end_time
+        );
+
+        // 3. Beri pengecualian jika user memilih "Dibatalkan" secara manual
+        if ($request->status === AgendaStatus::CANCELLED->value) {
+            $status = AgendaStatus::CANCELLED;
+        }
+
+        // 4. Siapkan data dan simpan ke database
+        $agenda = new Agenda();
+        $agenda->title = $request->title;
+        $agenda->description = $request->description;
+        $agenda->start_date = $request->start_date;
+        $agenda->end_date = $request->end_date;
+        $agenda->start_time = $request->start_time;
+        $agenda->end_time = $request->end_time;
+        $agenda->status = $status; // <-- Menggunakan status yang sudah dihitung otomatis
 
         // Handle file upload
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $filename = time() . '_' . Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME)) . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('agenda', $filename, 'public');
-            $data['file_path'] = $path;
+            $agenda->file_path = $path;
         }
 
-        $agenda = Agenda::create($data);
+        $agenda->save();
 
-        // Log activity
         $this->logCreate($agenda, "Menambahkan agenda baru: {$agenda->title}");
 
         return redirect()->route('admin.agenda.index')
-            ->with('success', 'Agenda berhasil ditambahkan.');
+            ->with('success', 'Agenda berhasil ditambahkan dengan status otomatis.');
     }
+
+    private function determineStatus($startDate, $endDate, $startTime, $endTime): AgendaStatus
+    {
+        $now = Carbon::now();
+
+        // Gabungkan tanggal dan waktu untuk perbandingan yang akurat
+        $startDateTime = Carbon::parse($startDate . ' ' . ($startTime ?? '00:00:00'));
+
+        // Jika tidak ada tanggal selesai, pakai tanggal mulai.
+        // Jika tidak ada waktu selesai, anggap selesai di akhir hari.
+        $endDateTime = Carbon::parse(($endDate ?? $startDate) . ' ' . ($endTime ?? '23:59:59'));
+
+        if ($now->lt($startDateTime)) {
+            // Waktu sekarang < Waktu Mulai -> Akan Datang
+            return AgendaStatus::UPCOMING;
+        } elseif ($now->between($startDateTime, $endDateTime)) {
+            // Waktu Mulai <= Waktu Sekarang <= Waktu Selesai -> Sedang Berlangsung
+            return AgendaStatus::ONGOING;
+        } else {
+            // Waktu Sekarang > Waktu Selesai -> Selesai
+            return AgendaStatus::COMPLETED;
+        }
+    }
+
 
     /**
      * Display the specified agenda.
@@ -128,23 +186,42 @@ class AgendaController extends Controller
     {
         // Simpan nilai lama untuk logging
         $oldValues = $agenda->toArray();
-        
+
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string|min:10',
-            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:10240', // 10MB max
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'start_time' => 'nullable|date_format:H:i',
+            'end_time' => 'nullable|date_format:H:i|after:start_time',
+            'status' => 'required|in:upcoming,ongoing,completed,cancelled',
+            'file' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx|max:5120', // 5MB max
         ], [
             'title.required' => 'Judul agenda wajib diisi.',
             'title.max' => 'Judul agenda maksimal 255 karakter.',
             'description.required' => 'Deskripsi kegiatan wajib diisi.',
             'description.min' => 'Deskripsi kegiatan minimal 10 karakter.',
+            'start_date.required' => 'Tanggal mulai wajib diisi.',
+            'start_date.date' => 'Tanggal mulai harus berupa tanggal yang valid.',
+            'end_date.date' => 'Tanggal selesai harus berupa tanggal yang valid.',
+            'end_date.after_or_equal' => 'Tanggal selesai tidak boleh lebih awal dari tanggal mulai.',
+            'start_time.date_format' => 'Format jam mulai tidak valid (HH:MM).',
+            'end_time.date_format' => 'Format jam selesai tidak valid (HH:MM).',
+            'end_time.after' => 'Jam selesai harus lebih besar dari jam mulai.',
+            'status.required' => 'Status agenda wajib dipilih.',
+            'status.in' => 'Status agenda tidak valid.',
             'file.mimes' => 'File harus berformat PDF, DOC, DOCX, XLS, XLSX, PPT, atau PPTX.',
-            'file.max' => 'Ukuran file maksimal 10MB.',
+            'file.max' => 'Ukuran file maksimal 5MB.',
         ]);
 
         $data = [
             'title' => $request->title,
             'description' => $request->description,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'start_time' => $request->start_time,
+            'end_time' => $request->end_time,
+            'status' => $request->status,
         ];
 
         // Handle file upload
@@ -175,7 +252,7 @@ class AgendaController extends Controller
     public function destroy(Agenda $agenda)
     {
         $title = $agenda->title;
-        
+
         // Delete file if exists
         if ($agenda->file_path && Storage::disk('public')->exists($agenda->file_path)) {
             Storage::disk('public')->delete($agenda->file_path);
@@ -183,7 +260,7 @@ class AgendaController extends Controller
 
         // Log activity sebelum menghapus
         $this->logDelete($agenda, "Menghapus agenda: {$title}");
-        
+
         $agenda->delete();
 
         return redirect()->route('admin.agenda.index')

@@ -61,7 +61,7 @@
             {{-- Sidebar --}}
             @include('layouts.sidebar')
 
-            <div class="flex flex-col flex-1 w-full">
+            <div class="flex flex-col flex-1 w-full min-w-0">
                 {{-- Top Navigation --}}
                 @include('layouts.navigation')
 

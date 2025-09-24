@@ -28,16 +28,43 @@
                                     Gambar akan dikompres otomatis untuk menghemat storage
                                 </span>
                                 <br>
-                                Format yang didukung: JPEG, PNG, GIF, WebP (Maksimal 10MB)
+                                Format yang didukung: JPEG, PNG, GIF, WebP (Maksimal 2MB)
                             </p>
-                            <div x-show="imagePreview" class="mt-2">
-                                <span class="block w-96 h-96 rounded-md overflow-hidden bg-gray-100 border">
+                            
+                            <!-- Preview Image dengan tombol X -->
+                            <div x-show="imagePreview" class="mt-2 relative">
+                                <span class="block w-96 h-96 rounded-md overflow-hidden bg-gray-100 border relative">
                                     <img :src="imagePreview" alt="Preview" class="w-full h-full object-cover">
+                                    <!-- Tombol X untuk membatalkan -->
+                                    <button type="button" 
+                                            @click="
+                                                imagePreview = '';
+                                                document.getElementById('image').value = '';
+                                            "
+                                            class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-lg">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
                                 </span>
+                                <p class="text-xs text-gray-500 mt-1">Klik tombol ❌ untuk membatalkan pilihan gambar</p>
                             </div>
+                            
                             <input id="image" type="file" name="image" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2"
                                 accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
-                                @change="imagePreview = URL.createObjectURL($event.target.files[0])" />
+                                @change="
+                                    const file = $event.target.files[0];
+                                    if (file) {
+                                        const maxSize = 2 * 1024 * 1024; // 2MB dalam bytes
+                                        if (file.size > maxSize) {
+                                            alert('Ukuran file terlalu besar! Maksimal 2MB.\nUkuran file Anda: ' + (file.size / 1024 / 1024).toFixed(2) + 'MB');
+                                            $event.target.value = '';
+                                            imagePreview = '';
+                                            return;
+                                        }
+                                        imagePreview = URL.createObjectURL(file);
+                                    }
+                                " />
                             <x-input-error :messages="$errors->get('image')" class="mt-2" />
                         </div>
 

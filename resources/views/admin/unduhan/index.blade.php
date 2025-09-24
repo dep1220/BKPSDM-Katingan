@@ -33,6 +33,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $item->title }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="text-indigo-600 hover:text-indigo-900 mr-4">Unduh</a>
+                                        <a href="{{ route('unduhan.edit', $item) }}" class="text-blue-600 hover:text-blue-900 mr-4">Edit</a>
                                         <form action="{{ route('unduhan.destroy', $item) }}" method="POST" class="inline" onsubmit="return confirm('Yakin?');">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900">Hapus</button>

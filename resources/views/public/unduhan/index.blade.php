@@ -73,52 +73,56 @@
                 
                 <!-- Form Pencarian dan Filter -->
                 <form method="GET" action="{{ route('public.unduhan') }}" class="mb-6 md:mb-8">
-                    <div class="flex flex-col md:flex-row gap-3 md:gap-4 md:items-center md:justify-between">
-                        <!-- Input Pencarian -->
-                        <div class="relative w-full md:max-w-sm">
-                            <div class="flex">
-                                <input type="text" 
-                                       name="search" 
-                                       value="{{ request('search') }}" 
-                                       placeholder="Cari dokumen…" 
-                                       class="w-full rounded-l-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 pl-10 pr-2 py-2 md:py-2.5" 
-                                       aria-label="Cari dokumen">
-                                <button type="submit" 
-                                        class="px-4 py-2 md:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-l-0 border-blue-600 hover:border-blue-700 transition-colors">
-                                    <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
-                                    </svg>
-                                </button>
+                    <div class="flex flex-col gap-3 md:gap-4">
+                        <!-- Search and Filter Row -->
+                        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center">
+                            <!-- Input Pencarian dengan Tombol Cari (Mobile: menyatu, Desktop: terpisah) -->
+                            <div class="relative flex-1 sm:max-w-md">
+                                <div class="flex">
+                                    <div class="relative flex-1">
+                                        <input type="text" 
+                                               name="search" 
+                                               value="{{ request('search') }}" 
+                                               placeholder="Cari dokumen…" 
+                                               class="w-full rounded-l-lg sm:rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 pl-10 pr-2 sm:pr-4 py-2 md:py-2.5" 
+                                               aria-label="Cari dokumen">
+                                        <svg class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </div>
+                                    <!-- Tombol Cari - menyatu di mobile, terpisah di desktop -->
+                                    <button type="submit" class="sm:hidden px-4 py-2 md:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-r-lg border border-l-0 border-blue-600 hover:border-blue-700 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                                            <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <svg class="w-5 h-5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                                <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
-                            </svg>
+                            
+                            <!-- Filter Tipe -->
+                            <div class="flex items-center gap-2 md:gap-3">
+                                <label for="filter-type" class="text-sm text-slate-600 whitespace-nowrap">Tipe:</label>
+                                <select name="type" 
+                                        id="filter-type" 
+                                        class="rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 py-2 md:py-2.5">
+                                    <option value="all" {{ request('type') === 'all' || !request('type') ? 'selected' : '' }}>Semua</option>
+                                    <option value="pdf" {{ request('type') === 'pdf' ? 'selected' : '' }}>PDF</option>
+                                    <option value="docs" {{ request('type') === 'docs' ? 'selected' : '' }}>Dokumen (DOC, DOCX)</option>
+                                    <option value="sheets" {{ request('type') === 'sheets' ? 'selected' : '' }}>Spreadsheet (XLS, XLSX)</option>
+                                    <option value="slides" {{ request('type') === 'slides' ? 'selected' : '' }}>Presentasi (PPT, PPTX)</option>
+                                    <option value="archives" {{ request('type') === 'archives' ? 'selected' : '' }}>Arsip (ZIP, RAR)</option>
+                                    <option value="others" {{ request('type') === 'others' ? 'selected' : '' }}>Lainnya</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Tombol Cari untuk Desktop -->
+                            <button type="submit" class="hidden sm:inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
+                                    <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
+                                </svg>
+                                Cari
+                            </button>
                         </div>
-                        
-                        <!-- Filter Tipe -->
-                        <div class="flex items-center gap-2 md:gap-3">
-                            <label for="filter-type" class="text-sm text-slate-600 whitespace-nowrap">Tipe:</label>
-                            <select name="type" 
-                                    id="filter-type" 
-                                    class="rounded-lg border-slate-300 focus:border-blue-500 focus:ring-blue-500 py-2 md:py-2.5"
-                                    onchange="this.form.submit()">
-                                <option value="all" {{ request('type') === 'all' || !request('type') ? 'selected' : '' }}>Semua</option>
-                                <option value="pdf" {{ request('type') === 'pdf' ? 'selected' : '' }}>PDF</option>
-                                <option value="docs" {{ request('type') === 'docs' ? 'selected' : '' }}>Dokumen (DOC, DOCX)</option>
-                                <option value="sheets" {{ request('type') === 'sheets' ? 'selected' : '' }}>Spreadsheet (XLS, XLSX)</option>
-                                <option value="slides" {{ request('type') === 'slides' ? 'selected' : '' }}>Presentasi (PPT, PPTX)</option>
-                                <option value="archives" {{ request('type') === 'archives' ? 'selected' : '' }}>Arsip (ZIP, RAR)</option>
-                                <option value="others" {{ request('type') === 'others' ? 'selected' : '' }}>Lainnya</option>
-                            </select>
-                        </div>
-                        
-                        <!-- Tombol Cari -->
-                        <button type="submit" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                                <path fill-rule="evenodd" d="M10.5 3.75a6.75 6.75 0 1 0 4.287 12.01l3.226 3.227a.75.75 0 1 0 1.06-1.06l-3.226-3.227A6.75 6.75 0 0 0 10.5 3.75Zm-5.25 6.75a5.25 5.25 0 1 1 10.5 0 5.25 5.25 0 0 1-10.5 0Z" clip-rule="evenodd"/>
-                            </svg>
-                            Cari
-                        </button>
                     </div>
                     
                     <!-- Reset Filter -->
@@ -177,7 +181,11 @@
                                                 @switch($ext)
                                                     @case('pdf')
                                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                            <path d="M6.75 3A2.25 2.25 0 0 0 4.5 5.25v13.5A2.25 2.25 0 0 0 6.75 21h10.5A2.25 2.25 0 0 0 19.5 18.75V8.244a2.25 2.25 0 0 0-.659-1.591l-3.494-3.494A2.25 2.25 0 0 0 13.756 2.5H6.75ZM8.25 12a.75.75 0 0 1 .75-.75h1.5A2.25 2.25 0 0 1 12.75 13.5v.75a2.25 2.25 0 0 1-2.25 2.25H9a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 0 .75-.75v-.75a.75.75 0 0 0-.75-.75H9a.75.75 0 0 1-.75-.75Zm6.75 0a.75.75 0 0 0-.75-.75H13.5a.75.75 0 0 0 0 1.5h.75a.75.75 0 0 1 .75.75v.75a.75.75 0 0 1-.75.75H13.5a.75.75 0 0 0 0 1.5h.75A2.25 2.25 0 0 0 16.5 14.25V13.5A2.25 2.25 0 0 0 14.25 11.25ZM8.25 9A.75.75 0 0 0 9 9.75h6a.75.75 0 0 0 0-1.5H9Z"/>
+                                                            <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
+                                                            <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
+                                                            <path d="M7.5 12.75a.75.75 0 0 1 .75-.75h.75a1.5 1.5 0 0 1 1.5 1.5v1.5a1.5 1.5 0 0 1-1.5 1.5H8.25a.75.75 0 0 1-.75-.75v-3ZM9 14.25v1.5h.75a.75.75 0 0 0 0-1.5H9Z" />
+                                                            <path d="M11.25 12.75a.75.75 0 0 1 .75-.75h1.5a1.5 1.5 0 0 1 0 3h-.75v.75a.75.75 0 0 1-1.5 0v-3Zm1.5.75v.75h.75a.75.75 0 0 0 0-1.5h-.75Z" />
+                                                            <path d="M15 12.75a.75.75 0 0 1 .75-.75h1.5a.75.75 0 0 1 0 1.5h-1.5v.75h1.5a.75.75 0 0 1 0 1.5h-1.5a.75.75 0 0 1-.75-.75v-2.25Z" />
                                                         </svg>
                                                         @break
                                                     @case('doc') @case('docx')

@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                
+
                 {{-- Error Summary --}}
                 @if ($errors->any())
                     <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -36,16 +36,16 @@
 
                 <form method="POST" action="{{ route('pejabat.store') }}" enctype="multipart/form-data">
                     @csrf
-                    
+
                     {{-- Nama Lengkap --}}
                     <div>
                         <x-input-label for="name" :value="__('Nama Lengkap')" />
-                        <x-text-input id="name" 
-                            class="block mt-1 w-full {{ $errors->has('name') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}" 
-                            type="text" 
-                            name="name" 
-                            :value="old('name')" 
-                            required 
+                        <x-text-input id="name"
+                            class="block mt-1 w-full {{ $errors->has('name') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
+                            type="text"
+                            name="name"
+                            :value="old('name')"
+                            required
                             placeholder="Masukkan nama lengkap pejabat"
                             aria-invalid="{{ $errors->has('name') ? 'true' : 'false' }}"
                             aria-describedby="name-error" />
@@ -58,15 +58,15 @@
                             </p>
                         @enderror
                     </div>
-                    
+
                     {{-- NIP --}}
                     <div class="mt-4">
                         <x-input-label for="nip" :value="__('NIP (Nomor Induk Pegawai)')" />
-                        <x-text-input id="nip" 
-                            class="block mt-1 w-full {{ $errors->has('nip') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}" 
-                            type="text" 
-                            name="nip" 
-                            :value="old('nip')" 
+                        <x-text-input id="nip"
+                            class="block mt-1 w-full {{ $errors->has('nip') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
+                            type="text"
+                            name="nip"
+                            :value="old('nip')"
                             placeholder="Contoh: 196501010199103001"
                             pattern="[0-9]*"
                             inputmode="numeric"
@@ -84,13 +84,13 @@
                             </p>
                         @enderror
                     </div>
-                    
+
                     {{-- JABATAN (DROPDOWN) --}}
                     <div class="mt-4">
                         <x-input-label for="jabatan" :value="__('Jabatan')" />
-                        <select id="jabatan" 
-                            name="jabatan" 
-                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ $errors->has('jabatan') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}" 
+                        <select id="jabatan"
+                            name="jabatan"
+                            class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm {{ $errors->has('jabatan') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
                             required
                             aria-invalid="{{ $errors->has('jabatan') ? 'true' : 'false' }}"
                             aria-describedby="jabatan-error">
@@ -112,8 +112,8 @@
                     </div>
 
                     {{-- FOTO (KOTAK & WAJIB) --}}
-                    <div class="mt-4" x-data="{ 
-                        photoPreview: '', 
+                    <div class="mt-4" x-data="{
+                        photoPreview: '',
                         hasOldPhoto: {{ old('photo') ? 'true' : 'false' }},
                         showPreview() {
                             return this.photoPreview || this.hasOldPhoto;
@@ -121,7 +121,7 @@
                     }">
                         <x-input-label for="photo" :value="__('Foto Pejabat')" />
                         <span class="text-red-500 text-sm">* Wajib diisi</span>
-                        
+
                         {{-- Preview Area --}}
                         <div x-show="showPreview()" class="mt-2">
                             <div class="relative inline-block">
@@ -134,7 +134,7 @@
                                         <span class="ml-2">Foto Dipilih</span>
                                     </div>
                                 </span>
-                                <button type="button" 
+                                <button type="button"
                                     x-show="showPreview()"
                                     @click="photoPreview = ''; hasOldPhoto = false; document.getElementById('photo').value = ''"
                                     class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600">
@@ -142,13 +142,13 @@
                                 </button>
                             </div>
                         </div>
-                        
-                        <input id="photo" 
-                            type="file" 
-                            name="photo" 
-                            required 
+
+                        <input id="photo"
+                            type="file"
+                            name="photo"
+                            required
                             accept="image/*"
-                            class="block w-full text-sm mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 {{ $errors->has('photo') ? 'border-red-500' : '' }}" 
+                            class="block w-full text-sm mt-2 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 {{ $errors->has('photo') ? 'border-red-500' : '' }}"
                             @change="photoPreview = URL.createObjectURL($event.target.files[0]); hasOldPhoto = false"
                             aria-invalid="{{ $errors->has('photo') ? 'true' : 'false' }}"
                             aria-describedby="photo-error" />
@@ -166,17 +166,17 @@
                     {{-- Urutan Tampil --}}
                     <div class="mt-4">
                         <x-input-label for="order" :value="__('Urutan Tampil')" />
-                        <x-text-input id="order" 
-                            class="block mt-1 w-full {{ $errors->has('order') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}" 
-                            type="number" 
-                            name="order" 
-                            :value="old('order', 0)" 
-                            required 
+                        <x-text-input id="order"
+                            class="block mt-1 w-full {{ $errors->has('order') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : '' }}"
+                            type="number"
+                            name="order"
+                            :value="old('order', 0)"
+                            required
                             min="0"
                             placeholder="0 untuk urutan pertama"
                             aria-invalid="{{ $errors->has('order') ? 'true' : 'false' }}"
                             aria-describedby="order-error" />
-                        <p class="text-sm text-gray-500 mt-1">Semakin kecil angka, semakin tinggi urutannya</p>
+                        <p class="text-sm text-gray-500 mt-1">Semakin kecil angka akan pertama tampil berdasarkan jabatanya</p>
                         @error('order')
                             <p id="order-error" class="mt-1 text-sm text-red-600 flex items-center">
                                 <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -186,10 +186,10 @@
                             </p>
                         @enderror
                     </div>
-                    
+
                     {{-- Action Buttons --}}
                     <div class="flex items-center justify-end mt-6 pt-4 border-t border-gray-200">
-                        <a href="{{ route('pejabat.index') }}" 
+                        <a href="{{ route('pejabat.index') }}"
                             class="text-sm text-gray-600 hover:text-gray-900 mr-4">
                             Batal
                         </a>

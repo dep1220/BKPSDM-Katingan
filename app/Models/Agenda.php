@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Enums\AgendaStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Carbon\Carbon;
 
 /**
  * @OA\Schema(
@@ -75,6 +78,11 @@ class Agenda extends Model
         'slug',
         'description',
         'file_path',
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
+        'status',
     ];
 
     /**
@@ -104,6 +112,11 @@ class Agenda extends Model
      */
     protected $casts = [
         'tanggal' => 'date',
+        'start_date' => 'date',
+        'end_date' => 'date',
+        'start_time' => 'datetime:H:i',
+        'end_time' => 'datetime:H:i',
+        // 'status' => AgendaStatus::class,
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -231,5 +244,147 @@ class Agenda extends Model
         } else {
             return $bytes . ' bytes';
         }
+    }
+
+    /**
+     * Dapatkan status agenda secara dinamis (Accessor).
+     * Versi ini lebih andal dalam menangani objek tanggal dan waktu.
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    public function status(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // 1. Jika status di DB adalah 'Dibatalkan', langsung kembalikan.
+                if ($value === AgendaStatus::CANCELLED->value) {
+                    return AgendaStatus::CANCELLED;
+                }
+
+               $now = Carbon::now('Asia/Jakarta');
+
+                // 2. Buat objek startDateTime dengan aman
+                // Mulai dari awal hari tanggal mulai
+                $startDateTime = $this->start_date->copy()->startOfDay();
+                // Jika ada jam mulai, atur jamnya
+                if ($this->start_time) {
+                    $startDateTime->setTimeFromTimeString($this->start_time->format('H:i:s'));
+                }
+
+                // 3. Buat objek endDateTime dengan aman
+                // Tentukan tanggal selesai (jika tidak ada, pakai tanggal mulai)
+                $endDate = $this->end_date ?? $this->start_date;
+                // Mulai dari akhir hari tanggal selesai
+                $endDateTime = $endDate->copy()->endOfDay();
+                // Jika ada jam selesai, atur jamnya
+                if ($this->end_time) {
+                    $endDateTime->setTimeFromTimeString($this->end_time->format('H:i:s'));
+                }
+
+                // 4. Logika perbandingan waktu
+                if ($now->lt($startDateTime)) {
+                    return AgendaStatus::UPCOMING;
+                } elseif ($now->between($startDateTime, $endDateTime)) {
+                    return AgendaStatus::ONGOING;
+                } else {
+                    return AgendaStatus::COMPLETED;
+                }
+            }
+        );
+    }
+
+    /**
+     * Method untuk auto-update status agenda berdasarkan waktu
+     * 
+     * @return void
+     */
+    public function updateStatusBasedOnTime()
+    {
+        // Jika status sudah dibatalkan, jangan ubah
+        if ($this->status === AgendaStatus::CANCELLED) {
+            return;
+        }
+
+        $now = now();
+        $startDateTime = null;
+        $endDateTime = null;
+
+        // Buat datetime dari start_date dan start_time
+        if ($this->start_date && $this->start_time) {
+            $startDateTime = $this->start_date->copy()->setTimeFromTimeString($this->start_time);
+        } elseif ($this->start_date) {
+            $startDateTime = $this->start_date->copy()->startOfDay();
+        }
+
+        // Buat datetime dari end_date dan end_time
+        if ($this->end_date && $this->end_time) {
+            $endDateTime = $this->end_date->copy()->setTimeFromTimeString($this->end_time);
+        } elseif ($this->end_date) {
+            $endDateTime = $this->end_date->copy()->endOfDay();
+        } elseif ($startDateTime) {
+            // Jika tidak ada end_date, gunakan start_date + 2 jam sebagai default
+            $endDateTime = $startDateTime->copy()->addHours(2);
+        }
+
+        $newStatus = null;
+
+        // Tentukan status berdasarkan waktu
+        if ($startDateTime && $endDateTime) {
+            if ($now->lt($startDateTime)) {
+                // Belum mulai
+                $newStatus = AgendaStatus::UPCOMING;
+            } elseif ($now->between($startDateTime, $endDateTime)) {
+                // Sedang berlangsung
+                $newStatus = AgendaStatus::ONGOING;
+            } elseif ($now->gt($endDateTime)) {
+                // Sudah selesai
+                $newStatus = AgendaStatus::COMPLETED;
+            }
+        } elseif ($startDateTime) {
+            if ($now->lt($startDateTime)) {
+                $newStatus = AgendaStatus::UPCOMING;
+            } else {
+                $newStatus = AgendaStatus::COMPLETED;
+            }
+        }
+
+        // Update status jika ada perubahan
+        if ($newStatus && $this->status !== $newStatus) {
+            $this->update(['status' => $newStatus]);
+        }
+    }
+
+    /**
+     * Scope untuk agenda yang perlu di-update statusnya
+     * 
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeNeedsStatusUpdate($query)
+    {
+        return $query->where('status', '!=', AgendaStatus::CANCELLED)
+                    ->whereNotNull('start_date');
+    }
+
+    /**
+     * Method static untuk batch update status semua agenda
+     * 
+     * @return int Jumlah agenda yang di-update
+     */
+    public static function batchUpdateStatus()
+    {
+        $agendas = self::needsStatusUpdate()->get();
+        $updated = 0;
+
+        foreach ($agendas as $agenda) {
+            $oldStatus = $agenda->status;
+            $agenda->updateStatusBasedOnTime();
+            
+            if ($agenda->status !== $oldStatus) {
+                $updated++;
+            }
+        }
+
+        return $updated;
     }
 }

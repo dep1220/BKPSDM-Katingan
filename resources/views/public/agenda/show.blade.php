@@ -177,6 +177,85 @@
                         @endif
                     </div>
 
+                    <!-- Jadwal Agenda -->
+                    @if($agenda->start_date || $agenda->start_time || $agenda->status)
+                        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 md:p-6 mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                <svg class="w-5 h-5 mr-2 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.75 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM7.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM8.25 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM9.75 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM10.5 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM12.75 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM14.25 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 17.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 15.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5ZM15 12.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM16.5 13.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"/>
+                                    <path fill-rule="evenodd" d="M6.75 2.25A.75.75 0 0 1 7.5 3v1.5h9V3A.75.75 0 0 1 18 3v1.5h.75a3 3 0 0 1 3 3v11.25a3 3 0 0 1-3 3H5.25a3 3 0 0 1-3-3V7.5a3 3 0 0 1 3-3H6V3a.75.75 0 0 1 .75-.75Zm13.5 9a1.5 1.5 0 0 0-1.5-1.5H5.25a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5Z" clip-rule="evenodd"/>
+                                </svg>
+                                Jadwal Agenda
+                            </h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <!-- Tanggal -->
+                                @if($agenda->start_date)
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 font-medium">Tanggal</div>
+                                            <div class="text-sm font-semibold text-gray-900">
+                                                {{ $agenda->start_date->format('d F Y') }}
+                                                @if($agenda->end_date && !$agenda->start_date->equalTo($agenda->end_date))
+                                                    <br><span class="text-gray-600">s.d {{ $agenda->end_date->format('d F Y') }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <!-- Waktu -->
+                                @if($agenda->start_time || $agenda->end_time)
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 font-medium">Waktu</div>
+                                            <div class="text-sm font-semibold text-gray-900">
+                                                @if($agenda->start_time)
+                                                    {{ $agenda->start_time }}
+                                                    @if($agenda->end_time)
+                                                        - {{ $agenda->end_time }}
+                                                    @endif
+                                                    WIB
+                                                @elseif($agenda->end_time)
+                                                    Selesai: {{ $agenda->end_time }} WIB
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                <!-- Status -->
+                                @if($agenda->status)
+                                    <div class="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-200">
+                                        <div class="flex-shrink-0 w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs text-gray-500 font-medium">Status</div>
+                                            <div class="text-sm">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $agenda->status->color() }}">
+                                                    {{ $agenda->status->label() }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Title -->
                     <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
                         {{ $agenda->title }}

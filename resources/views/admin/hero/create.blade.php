@@ -34,10 +34,10 @@
                                     <img :src="imagePreview" class="w-full h-full object-cover">
                                 </span>
                             </div>
-                            <input id="background_image" type="file" name="background_image" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2" @change="imagePreview = URL.createObjectURL($event.target.files[0])" />
+                            <input id="background_image" type="file" name="background_image" required class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2" @change="imagePreview = URL.createObjectURL($event.target.files[0])" accept="image/*" />
                             <x-input-error :messages="$errors->get('background_image')" class="mt-2" />
                         </div>
-                        
+
                         <!-- Button Text -->
                         <div class="mt-4">
                             <x-input-label for="button_text" :value="__('Teks Tombol (Opsional)')" />
@@ -51,7 +51,7 @@
                             <x-text-input id="button_link" class="block mt-1 w-full" type="url" name="button_link" placeholder="https://..." :value="old('button_link')" />
                             <x-input-error :messages="$errors->get('button_link')" class="mt-2" />
                         </div>
-                        
+
                         <!-- Order -->
                         <div class="mt-4">
                             <x-input-label for="order" :value="__('Urutan Tampil')" />
