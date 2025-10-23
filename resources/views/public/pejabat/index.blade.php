@@ -61,7 +61,7 @@
                         {{-- Info Text --}}
                         <div class="p-6 text-center">
                             <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pimpinan->name }}</h3>
-                            <p class="text-gray-600 font-medium mb-2">{{ $pimpinan->jabatan }}</p>
+                            <p class="text-xs text-gray-600 font-medium mb-2">{{ $pimpinan->jabatan }}</p>
                             @if($pimpinan->nip)
                             <p class="text-sm text-gray-500">NIP. {{ $pimpinan->nip }}</p>
                             @endif
@@ -74,10 +74,16 @@
             </div>
             @endif
 
-            {{-- 2. Sekretaris --}}
-            @if(isset($staffPejabats['Sekretaris']))
+            {{-- 2. Sekretaris Badan --}}
+            @php
+                $sekretarisBadan = $staffPejabats->filter(function($pejabatList, $jabatan) {
+                    return str_contains(strtolower($jabatan), 'sekretaris');
+                })->flatten();
+            @endphp
+            
+            @if($sekretarisBadan->isNotEmpty())
             <div class="flex justify-center mb-16">
-                @foreach($staffPejabats['Sekretaris'] as $sekretaris)
+                @foreach($sekretarisBadan as $sekretaris)
                 <div class="w-64 sm:w-72 mr-4">
                     {{-- Kartu dengan design seperti ID Card --}}
                     <div class="bg-white rounded-lg shadow-lg border-t-4 border-blue-600 overflow-hidden">
@@ -98,7 +104,7 @@
                         {{-- Info Text --}}
                         <div class="p-6 text-center">
                             <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $sekretaris->name }}</h3>
-                            <p class="text-gray-600 font-medium mb-2">{{ $sekretaris->jabatan }}</p>
+                            <p class="text-xs text-gray-600 font-medium mb-2">{{ $sekretaris->jabatan }}</p>
                             @if($sekretaris->nip)
                             <p class="text-sm text-gray-500">NIP. {{ $sekretaris->nip }}</p>
                             @endif
@@ -114,8 +120,8 @@
 
             {{-- 3. Kepala Sub Bagian --}}
             @php
-                $kepalaSubBagian = collect($staffPejabats)->filter(function($pejabatList, $jabatan) {
-                    return str_contains(strtolower($jabatan), 'kasubag');
+                $kepalaSubBagian = $staffPejabats->filter(function($pejabatList, $jabatan) {
+                    return str_contains(strtolower($jabatan), 'kepala sub bagian');
                 });
             @endphp
 
@@ -143,7 +149,7 @@
                                 {{-- Info Text --}}
                                 <div class="p-6 text-center">
                                     <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pejabat->name }}</h3>
-                                    <p class="text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
+                                    <p class="text-xs text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
                                     @if($pejabat->nip)
                                     <p class="text-sm text-gray-500">NIP. {{ $pejabat->nip }}</p>
                                     @endif
@@ -158,17 +164,17 @@
             </div>
             @endif
 
-            {{-- 4. Staff (selain Sekretaris dan Kepala Bidang) --}}
+            {{-- 4. Kepala Bidang (sisanya) --}}
             @php
-                $staff = collect($staffPejabats)->filter(function($pejabatList, $jabatan) {
-                    return !str_contains(strtolower($jabatan), 'sekretaris') && 
-                        //    !str_contains(strtolower($jabatan), 'kasubag') && 
-                           !str_contains(strtolower($jabatan), 'kasubag');
+                $kepalaBidang = $staffPejabats->filter(function($pejabatList, $jabatan) {
+                    return str_contains(strtolower($jabatan), 'kepala bidang') && 
+                           !str_contains(strtolower($jabatan), 'sekretaris') && 
+                           !str_contains(strtolower($jabatan), 'kepala sub bagian');
                 });
             @endphp
 
             <div class="flex flex-wrap justify-center gap-6">
-                @foreach($staff as $jabatan => $pejabatGroup)
+                @foreach($kepalaBidang as $jabatan => $pejabatGroup)
                     @foreach($pejabatGroup as $pejabat)
                         <div class="w-64 sm:w-72">
                             {{-- Kartu dengan design seperti ID Card --}}
@@ -190,7 +196,7 @@
                                 {{-- Info Text --}}
                                 <div class="p-6 text-center">
                                     <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pejabat->name }}</h3>
-                                    <p class="text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
+                                    <p class="text-xs text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
                                     @if($pejabat->nip)
                                     <p class="text-sm text-gray-500">NIP. {{ $pejabat->nip }}</p>
                                     @endif
@@ -203,8 +209,11 @@
                     @endforeach
                 @endforeach
                 
-                @if($staff->isEmpty()  && !isset($staffPejabats['Sekretaris']) && !isset($staffPejabats['Kepala Sub Bagian']) && $pimpinan === null)
+                @if($kepalaBidang->isEmpty() && $kepalaSubBagian->isEmpty() && $sekretarisBadan->isEmpty() && $pimpinan === null)
                     <div class="text-center py-16">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
                         <p class="text-gray-500 text-lg">Belum ada data pejabat yang dimasukkan.</p>
                     </div>
                 @endif

@@ -126,7 +126,9 @@
                         <div class="mt-6">
                             <h3 class="text-sm font-semibold text-slate-700">Jam Kerja</h3>
                             <ul class="mt-2 text-sm text-slate-600 space-y-1">
-                                <li>Senin–Jumat: 08.00 – 16.00</li>
+                                <li>Senin–Jumat: 08.00 – 15.30</li>
+                                <li>Istirahat: 12.00 - 13.00</li>
+                                <li>Istirahat Jumat: 11.30 - 13.00</li>
                                 <li>Sabtu–Minggu: Tutup</li>
                             </ul>
                         </div>
@@ -431,9 +433,9 @@
 
                 span.style.display = 'inline-block';
                 span.style.transform = `
-                rotate(${randomRotate}deg) 
-                scale(${randomScale}) 
-                skew(${randomSkew}deg) 
+                rotate(${randomRotate}deg)
+                scale(${randomScale})
+                skew(${randomSkew}deg)
                 translateY(${randomVertical}px)
             `;
                 span.style.filter = `blur(${0.2 + Math.random() * 0.3}px)`;

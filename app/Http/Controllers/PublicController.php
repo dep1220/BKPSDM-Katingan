@@ -29,8 +29,10 @@ class PublicController extends Controller
         $latestGaleri = Galeri::latest()->take(4)->get();
 
         // Ambil struktur pejabat sesuai enum
-        $strukturPejabat = Pejabat::where('jabatan', JabatanEnum::SEKRETARIS->value)
-                                    ->orWhere('jabatan', JabatanEnum::KEPALA_BIDANG->value)
+        $strukturPejabat = Pejabat::where('jabatan', JabatanEnum::SEKRETARIS_BADAN->value)
+                                    ->orWhere('jabatan', JabatanEnum::KEPALA_SUB_BAGIAN->value)
+                                    ->orWhere('jabatan', JabatanEnum::KEPALA_BIDANG_PENGADAAN->value)
+                                    ->orWhere('jabatan', JabatanEnum::KEPALA_BIDANG_MUTASI->value)
                                     ->orderBy('order')
                                     ->get();
 
@@ -38,13 +40,13 @@ class PublicController extends Controller
         $groupedPejabatsUnsorted = $strukturPejabat->groupBy('jabatan');
 
         $groupedPejabats = $groupedPejabatsUnsorted->sortBy(function ($group, $jabatan) {
-            if ($jabatan === JabatanEnum::SEKRETARIS->value) {
-                return 1; // Prioritas pertama
-            } elseif ($jabatan === JabatanEnum::KEPALA_BIDANG->value) {
-                return 2; // Prioritas kedua
-            } else {
-                return 3; // Prioritas lainnya
+            // Cari enum yang sesuai untuk mendapatkan priority
+            foreach (JabatanEnum::cases() as $jabatanEnum) {
+                if ($jabatanEnum->value === $jabatan) {
+                    return $jabatanEnum->priority();
+                }
             }
+            return 999; // Priority default untuk jabatan yang tidak ada di enum
         });
 
         return view('public.index', compact(
