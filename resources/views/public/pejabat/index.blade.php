@@ -63,7 +63,7 @@
                             <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pimpinan->name }}</h3>
                             <p class="text-xs text-gray-600 font-medium mb-2">{{ $pimpinan->jabatan }}</p>
                             @if($pimpinan->nip)
-                            <p class="text-sm text-gray-500">NIP. {{ $pimpinan->nip }}</p>
+                            <p class="text-sm text-gray-500">NIP. {{ str_repeat('*', 8) . substr($pimpinan->nip, 8) }}</p>
                             @endif
                         </div>
                         
@@ -106,7 +106,7 @@
                             <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $sekretaris->name }}</h3>
                             <p class="text-xs text-gray-600 font-medium mb-2">{{ $sekretaris->jabatan }}</p>
                             @if($sekretaris->nip)
-                            <p class="text-sm text-gray-500">NIP. {{ $sekretaris->nip }}</p>
+                            <p class="text-sm text-gray-500">NIP. {{ str_repeat('*', 8) . substr($sekretaris->nip, 8) }}</p>
                             @endif
                         </div>
                         
@@ -151,7 +151,7 @@
                                     <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pejabat->name }}</h3>
                                     <p class="text-xs text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
                                     @if($pejabat->nip)
-                                    <p class="text-sm text-gray-500">NIP. {{ $pejabat->nip }}</p>
+                                    <p class="text-sm text-gray-500">NIP. {{ str_repeat('*', 8) . substr($pejabat->nip, 8) }}</p>
                                     @endif
                                 </div>
                                 
@@ -198,7 +198,7 @@
                                     <h3 class="font-bold text-lg text-gray-900 mb-1">{{ $pejabat->name }}</h3>
                                     <p class="text-xs text-gray-600 font-medium mb-2">{{ $pejabat->jabatan }}</p>
                                     @if($pejabat->nip)
-                                    <p class="text-sm text-gray-500">NIP. {{ $pejabat->nip }}</p>
+                                    <p class="text-sm text-gray-500">NIP. {{ str_repeat('*', 8) . substr($pejabat->nip, 8) }}</p>
                                     @endif
                                 </div>
                                 

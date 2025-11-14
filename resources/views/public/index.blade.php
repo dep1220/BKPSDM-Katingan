@@ -1000,7 +1000,7 @@
                                         <p class="text-gray-600 font-medium mb-2 text-sm md:text-base">
                                             {{ $pimpinan->jabatan }}</p>
                                         @if ($pimpinan->nip)
-                                            <p class="text-xs md:text-sm text-gray-500">NIP. {{ $pimpinan->nip }}</p>
+                                            <p class="text-xs md:text-sm text-gray-500">NIP. {{ str_repeat('*', 8) . substr($pimpinan->nip, 8) }}</p>
                                         @endif
                                     </div>
 
