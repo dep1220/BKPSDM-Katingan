@@ -51,135 +51,24 @@
                 @endforelse
             </div>
             <div class="swiper-pagination" aria-label="Navigasi slide"></div>
-
-            <!-- Custom Navigation Buttons -->
-            <button id="prevHero"
-                class="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
-            </button>
-
-            <button id="nextHero"
-                class="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full transition-all duration-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
         </div>
 
         <style>
-            /* Custom Hero Navigation Styles */
-            #prevHero,
-            #nextHero {
-                opacity: 0;
-                visibility: hidden;
-                transform: translateY(-50%) scale(0.8);
+            /* Cursor pointer pada slider untuk indikasi clickable */
+            .swiper-container {
+                cursor: pointer;
+            }
+
+            /* Custom pagination styling */
+            .swiper-pagination-bullet {
+                background: rgba(255, 255, 255, 0.5);
+                opacity: 1;
                 transition: all 0.3s ease;
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.2);
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             }
 
-            /* Mobile-first responsive sizes */
-            @media (max-width: 640px) {
-
-                #prevHero,
-                #nextHero {
-                    padding: 0.5rem;
-                    width: 2.25rem;
-                    height: 2.25rem;
-                    background-color: transparent;
-                    backdrop-filter: none;
-                    border: 2px solid rgba(255, 255, 255, 0.6);
-                    box-shadow: none;
-                }
-
-                #prevHero {
-                    left: 0.75rem !important;
-                }
-
-                #nextHero {
-                    right: 0.75rem !important;
-                }
-
-                #prevHero svg,
-                #nextHero svg {
-                    width: 1rem;
-                    height: 1rem;
-                    stroke-width: 3;
-                }
-
-                #prevHero:hover,
-                #nextHero:hover {
-                    background-color: transparent;
-                    transform: translateY(-50%) scale(1.05);
-                    border-color: rgba(255, 255, 255, 0.9);
-                    box-shadow: none;
-                }
-            }
-
-            @media (min-width: 641px) and (max-width: 768px) {
-
-                #prevHero,
-                #nextHero {
-                    padding: 0.75rem;
-                    width: 2.75rem;
-                    height: 2.75rem;
-                }
-
-                #prevHero svg,
-                #nextHero svg {
-                    width: 1.125rem;
-                    height: 1.125rem;
-                }
-            }
-
-            @media (min-width: 769px) {
-
-                #prevHero,
-                #nextHero {
-                    padding: 0.75rem;
-                    width: 2.5rem;
-                    height: 2.5rem;
-                }
-
-                #prevHero svg,
-                #nextHero svg {
-                    width: 1.25rem;
-                    height: 1.25rem;
-                }
-            }
-
-            /* Enhanced hover effects untuk desktop */
-            @media (min-width: 641px) {
-
-                #prevHero:hover,
-                #nextHero:hover {
-                    background-color: rgba(172, 172, 172, 0.37);
-                    transform: translateY(-50%) scale(1.05);
-                    border-color: rgba(255, 255, 255, 0.4);
-                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-                }
-            }
-
-            /* Active state untuk semua device */
-            #prevHero:active,
-            #nextHero:active {
-                transform: translateY(-50%) scale(0.95);
-            }
-
-            /* Visible state untuk mobile - lebih terlihat */
-            @media (max-width: 640px) {
-
-                .swiper-container:hover #prevHero,
-                .swiper-container:hover #nextHero,
-                #prevHero.show-mobile,
-                #nextHero.show-mobile {
-                    opacity: 0.9 !important;
-                    visibility: visible !important;
-                    transform: translateY(-50%) scale(1) !important;
-                }
+            .swiper-pagination-bullet-active {
+                background: #ffffff;
+                transform: scale(1.3);
             }
         </style>
 
@@ -189,12 +78,12 @@
                 const slides = document.querySelectorAll('.swiper-slide');
                 const slideCount = slides.length;
 
-                // Konfigurasi dasar Swiper tanpa navigasi built-in
+                // Konfigurasi Swiper sederhana
                 const swiperConfig = {
-                    autoplay: {
+                    autoplay: slideCount > 1 ? {
                         delay: 5000,
                         disableOnInteraction: false
-                    },
+                    } : false,
                     pagination: {
                         el: '.swiper-pagination',
                         clickable: true
@@ -203,145 +92,29 @@
                     fadeEffect: {
                         crossFade: true
                     },
-                    keyboard: {
-                        enabled: true
-                    },
-
-                    // Nonaktifkan loop jika slides kurang dari 2
                     loop: slideCount > 1,
-
-                    // Nonaktifkan autoplay jika hanya ada 1 slide
-                    autoplay: slideCount > 1 ? {
-                        delay: 5000,
-                        disableOnInteraction: false
-                    } : false,
-
-                    // Sembunyikan navigation jika hanya ada 1 slide
                     allowTouchMove: slideCount > 1,
                 };
 
                 // Inisialisasi Swiper
                 const heroSwiper = new Swiper('.swiper-container', swiperConfig);
 
-                // Custom navigation buttons
+                // Klik untuk slide next
                 const swiperContainer = document.querySelector('.swiper-container');
-                const nextBtn = document.getElementById('nextHero');
-                const prevBtn = document.getElementById('prevHero');
                 const pagination = document.querySelector('.swiper-pagination');
-                let hideTimeout;
-
-                // Custom navigation event handlers
-                if (nextBtn && slideCount > 1) {
-                    nextBtn.addEventListener('click', () => {
-                        heroSwiper.slideNext();
-                    });
-                }
-
-                if (prevBtn && slideCount > 1) {
-                    prevBtn.addEventListener('click', () => {
-                        heroSwiper.slidePrev();
-                    });
-                }
 
                 if (swiperContainer && slideCount > 1) {
-                    // Deteksi mobile device
-                    const isMobile = window.innerWidth <= 640;
-
-                    // Function to show navigation
-                    function showNavigation() {
-                        if (nextBtn) {
-                            nextBtn.style.cssText +=
-                                'opacity: 1 !important; visibility: visible !important; transform: translateY(-50%) scale(1) !important;';
-                            if (isMobile) nextBtn.classList.add('show-mobile');
+                    swiperContainer.addEventListener('click', (e) => {
+                        // Jika bukan klik pada pagination, slide ke next
+                        if (!e.target.closest('.swiper-pagination')) {
+                            heroSwiper.slideNext();
                         }
-                        if (prevBtn) {
-                            prevBtn.style.cssText +=
-                                'opacity: 1 !important; visibility: visible !important; transform: translateY(-50%) scale(1) !important;';
-                            if (isMobile) prevBtn.classList.add('show-mobile');
-                        }
-
-                        // Clear existing timeout
-                        clearTimeout(hideTimeout);
-
-                        // Set timeout to hide navigation - lebih lama untuk mobile
-                        const hideDelay = isMobile ? 4000 : 3000;
-                        hideTimeout = setTimeout(hideNavigation, hideDelay);
-                    }
-
-                    // Function to hide navigation
-                    function hideNavigation() {
-                        if (nextBtn) {
-                            nextBtn.style.cssText +=
-                                'opacity: 0 !important; visibility: hidden !important; transform: translateY(-50%) scale(0.8) !important;';
-                            nextBtn.classList.remove('show-mobile');
-                        }
-                        if (prevBtn) {
-                            prevBtn.style.cssText +=
-                                'opacity: 0 !important; visibility: hidden !important; transform: translateY(-50%) scale(0.8) !important;';
-                            prevBtn.classList.remove('show-mobile');
-                        }
-                    }
-
-                    // Show navigation on various interactions
-                    swiperContainer.addEventListener('mouseenter', showNavigation);
-                    swiperContainer.addEventListener('mousemove', showNavigation);
-                    swiperContainer.addEventListener('touchstart', showNavigation);
-                    swiperContainer.addEventListener('touchmove', showNavigation);
-                    swiperContainer.addEventListener('focus', showNavigation, true);
-
-                    // Mobile-specific: show on tap anywhere on slider
-                    if (isMobile) {
-                        swiperContainer.addEventListener('click', (e) => {
-                            // Jika bukan klik pada tombol navigasi, tampilkan navigasi
-                            if (!e.target.closest('#nextHero') && !e.target.closest('#prevHero')) {
-                                showNavigation();
-                            }
-                        });
-                    }
-
-                    // Keep navigation visible while hovering over buttons
-                    if (nextBtn) {
-                        nextBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-                        nextBtn.addEventListener('mouseleave', () => {
-                            const hideDelay = isMobile ? 2000 : 1000;
-                            hideTimeout = setTimeout(hideNavigation, hideDelay);
-                        });
-
-                        // Mobile touch events
-                        nextBtn.addEventListener('touchstart', () => clearTimeout(hideTimeout));
-                    }
-
-                    if (prevBtn) {
-                        prevBtn.addEventListener('mouseenter', () => clearTimeout(hideTimeout));
-                        prevBtn.addEventListener('mouseleave', () => {
-                            const hideDelay = isMobile ? 2000 : 1000;
-                            hideTimeout = setTimeout(hideNavigation, hideDelay);
-                        });
-
-                        // Mobile touch events
-                        prevBtn.addEventListener('touchstart', () => clearTimeout(hideTimeout));
-                    }
-
-                    // Show navigation briefly on slide change
-                    heroSwiper.on('slideChange', () => {
-                        showNavigation();
                     });
-
-                    // Initial state - show longer for mobile
-                    const initialShowDelay = isMobile ? 3000 : 2000;
-                    setTimeout(hideNavigation, initialShowDelay);
-
-                    // Show navigation on initial load untuk mobile
-                    if (isMobile) {
-                        setTimeout(showNavigation, 500);
-                    }
                 }
 
-                // Sembunyikan navigasi dan pagination jika hanya ada 1 slide
-                if (slideCount <= 1) {
-                    if (pagination) pagination.style.display = 'none';
-                    if (nextBtn) nextBtn.style.display = 'none';
-                    if (prevBtn) prevBtn.style.display = 'none';
+                // Sembunyikan pagination jika hanya ada 1 slide
+                if (slideCount <= 1 && pagination) {
+                    pagination.style.display = 'none';
                 }
             });
         </script>

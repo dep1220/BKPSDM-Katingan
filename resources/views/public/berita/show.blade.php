@@ -119,7 +119,7 @@
                 </div>
 
                 {{-- Konten Artikel --}}
-                <div class="prose max-w-none lg:prose-lg text-gray-700 protected-content" id="berita-content">
+                <div class="prose max-w-none lg:prose-lg text-gray-700 protected-content prose-a:text-blue-600 hover:prose-a:text-blue-800 prose-a:underline" id="berita-content">
                     {!! $berita->content !!}
                 </div>
 
@@ -296,12 +296,52 @@
 
     // Test fungsi saat halaman dimuat
     document.addEventListener('DOMContentLoaded', function() {
-        // Share buttons ready
-
+        // Share buttons ready     
         // Test click event pada tombol pertama
         setTimeout(() => {
             // All share functions loaded successfully
         }, 1000);
     });
+
+        const contentArea = document.getElementById('berita-content');
+        
+        if (contentArea) {
+            const links = contentArea.querySelectorAll('a');
+
+            links.forEach(function(link) {
+                // Ambil isi href aslinya
+                let url = link.getAttribute('href');
+
+                // Cek apakah url ada isinya
+                if (url) {
+                    // JANGAN ubah jika itu link internal (diawali /), anchor (#), atau mailto:
+                    if (!url.startsWith('/') && !url.startsWith('#') && !url.startsWith('mailto:')) {
+                        
+                        // Cek apakah link TIDAK diawali http:// atau https://
+                        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                            // Paksa tambahkan https:// di depannya
+                            url = 'https://' + url;
+                            link.setAttribute('href', url);
+                        }
+
+                        // Paksa buka di tab baru
+                        link.setAttribute('target', '_blank');
+                        link.setAttribute('rel', 'noopener noreferrer');
+                    }
+                }
+            });
+        }
 </script>
+@endpush
+
+@push('styles')
+<style>
+    #berita-content a {
+        color: #2563eb; /* Warna biru */
+        text-decoration: underline;
+    }
+    #berita-content a:hover {
+        color: #1e40af; /* Warna biru gelap saat hover */
+    }
+</style>
 @endpush
